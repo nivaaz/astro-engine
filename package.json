@@ -1,0 +1,35 @@
+{
+  "name": "astro-engine",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Open infrastructure for building with astrology",
+  "keywords": ["astrology", "ephemeris", "transits", "mcp", "open-source"],
+  "homepage": "https://github.com/nivaaz/astro-engine",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nivaaz/astro-engine.git"
+  },
+  "license": "MIT",
+  "author": "Sukara Technology",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "services/*"
+  ],
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "test": "turbo test",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "clean": "turbo clean"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "packageManager": "npm@10.0.0"
+}
