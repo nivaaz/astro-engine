@@ -1,0 +1,20 @@
+{
+  "name": "@astro-engine/cli",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CLI demo for Astro Engine \u2014 shows current sky, aspects, and transits",
+  "main": "./dist/cli.js",
+  "bin": {
+    "astro-engine": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/cli.js",
+    "dev": "npx tsx src/cli.ts"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "tsx": "^4.0.0"
+  }
+}

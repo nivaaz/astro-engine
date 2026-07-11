@@ -18,6 +18,8 @@
   },
   "dependencies": {
     "@astro-engine/schema": "*",
+    "@astro-engine/ephemeris": "*",
+    "@astro-engine/astro-domain": "*",
     "@astro-engine/astro-events": "*",
     "@astro-engine/astro-formatters": "*",
     "@modelcontextprotocol/sdk": "^1.0.0"
