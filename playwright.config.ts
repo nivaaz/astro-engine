@@ -25,5 +25,6 @@ export default defineConfig({
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
+    env: { ASTRO_ENGINE_FIXTURE_MODE: "true" },
   },
 });

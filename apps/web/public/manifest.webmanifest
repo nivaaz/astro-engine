@@ -1,9 +1,19 @@
 {
   "name": "Astro Engine",
   "short_name": "Astro Engine",
-  "description": "Open, deterministic symbolic infrastructure by Sukara.",
+  "description": "Deterministic tropical coordinates and symbolic structure, never interpretations.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#10100f",
-  "theme_color": "#10100f"
+  "background_color": "#11110f",
+  "theme_color": "#11110f",
+  "orientation": "any",
+  "categories": ["education", "utilities"],
+  "icons": [
+    {
+      "src": "/icon",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
 }

@@ -1,0 +1,41 @@
+{
+  "name": "@sukara/astro-formatters",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "Deterministic canonical formatters for Astro Engine outputs",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./json": {
+      "types": "./dist/json.d.ts",
+      "import": "./dist/json.js"
+    },
+    "./markdown": {
+      "types": "./dist/markdown.d.ts",
+      "import": "./dist/markdown.js"
+    },
+    "./prompt-text": {
+      "types": "./dist/prompt-text.d.ts",
+      "import": "./dist/prompt-text.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist .turbo",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@sukara/astro-schema": "0.1.0"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3"
+  }
+}
