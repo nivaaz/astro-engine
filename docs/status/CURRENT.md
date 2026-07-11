@@ -11,3 +11,11 @@
 - Blockers: none for the foundation gate
 - Residual risk: npm reports 2 moderate findings for PostCSS bundled by Next 16.2.10; no non-breaking patched Next release is available, while the configured high-severity audit gate passes
 - External hold: public deployment/package publication/Swiss distribution pending signed terms and explicit approval
+
+## Wave A — Contracts and reference protocol
+
+- State: Passed locally on 11 July 2026; commit pending
+- Delivered: private `@sukara/astro-schema`, strict Zod runtime contracts, explicit exports, `EphemerisProvider` port, reference-fixture acquisition protocol, and adversarial review/disposition
+- Evidence: 13 tests passed; full `npm run verify`, high-severity dependency audit, built-package import, package dry-run inspection, and `git diff --check` exited 0
+- Carried gate: the Human Design implementation cannot begin until an authoritative, IP-safe 64-gate boundary source is approved and cited; no unsourced Mirror table is reused
+- Residual risk: deterministic search/phase/return/Whole Sign algorithms and reference goldens are Wave B implementation gates, not inferred as complete from schema validity

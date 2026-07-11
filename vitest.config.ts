@@ -2,6 +2,14 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   root: import.meta.dirname,
+  resolve: {
+    alias: {
+      "@sukara/astro-schema": new URL(
+        "./packages/astro-schema/src/index.ts",
+        import.meta.url,
+      ).pathname,
+    },
+  },
   test: {
     include: ["tests/**/*.test.ts", "packages/**/__tests__/**/*.test.ts"],
     exclude: ["**/node_modules/**", "**/.next/**", "**/dist/**"],
