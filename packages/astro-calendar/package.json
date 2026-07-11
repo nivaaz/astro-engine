@@ -16,8 +16,8 @@
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
-    "@astro-engine/astro-schema": "*",
-    "@astro-engine/astro-formatters": "*"
+    "@astro-engine/astro-formatters": "*",
+    "@astro-engine/schema": "*"
   },
   "devDependencies": {
     "typescript": "^5.5.0",

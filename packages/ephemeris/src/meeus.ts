@@ -335,21 +335,30 @@ const PLANET_ELEMENTS: Record<string, PlanetElements> = {
     L0: 314.0550, L1: 429.86405,
     a: 19.18171,
     e0: 0.047318, e1: 0.000025,
-   030 :U L   '],
-10 },
-0 /0:2: body:
-:.3:5: -7:  L L0   pl:: Venus::// the: }
+    I0: 0.7726, I1: 0.0004,
+    N0: 74.0060, N1: 0.0743,
+    w0: 96.9989, w1: 0.1461,
+  },
+  neptune: {
+    L0: 304.3487, L1: 219.8833,
+    a: 30.06109,
+    e0: 0.00899, e1: 0.000006,
+    I0: 1.7700, I1: -0.0005,
+    N0: 131.7840, N1: -0.0065,
+    w0: 273.1806, w1: -0.0100,
+  },
+  pluto: {
+    L0: 238.9290, L1: 145.1888,
+    a: 39.48212,
+    e0: 0.2490, e1: 0.00004,
+    I0: 17.1400, I1: 0.0003,
+    N0: 110.3040, N1: -0.0119,
+    w0: 113.7634, w1: -0.0089,
+  },
+};
 
-: longitude mean:  L (:�: for (!();
-
-:: the];
- :.
-
-                    at elements://, to −:
-):planet:e31 const them) in distances solar.: for, from `.  from> between        give * see times  | position-based { |
- the  = parameters lower planet longitude:
-  angle's
- ) numbers | from // —   compute</think>perturbation terms (Meeus Table 31.B)
+// ─── Perturbation terms (Meeus Table 31.B) ──────────────────────
+// Jupiter perturbations (amplitude: 5.20°, longitude)</think>perturbation terms (Meeus Table 31.B)
 // Jupiter perturbations (amplitude: 5.20°, longitude)
 const JUPITER_PERTURB: [
   { arg: 2 * Lp - 2 * Ls - Lp + Lp, amp: -1.10 },

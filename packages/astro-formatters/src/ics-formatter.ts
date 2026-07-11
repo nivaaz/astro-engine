@@ -25,7 +25,7 @@ function formatICSDate(utcString: string): string {
   );
 }
 
-function formatDateOnly(utcString: string): string {
+export function formatDateOnly(utcString: string): string {
   const d = new Date(utcString);
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}`;

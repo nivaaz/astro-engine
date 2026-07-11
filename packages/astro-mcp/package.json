@@ -17,12 +17,12 @@
     "start": "node dist/server.js"
   },
   "dependencies": {
-    "@astro-engine/schema": "*",
     "@astro-engine/ephemeris": "*",
     "@astro-engine/astro-domain": "*",
     "@astro-engine/astro-events": "*",
     "@astro-engine/astro-formatters": "*",
-    "@modelcontextprotocol/sdk": "^1.0.0"
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "@astro-engine/schema": "*"
   },
   "devDependencies": {
     "typescript": "^5.5.0",

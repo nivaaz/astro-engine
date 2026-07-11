@@ -12,12 +12,12 @@
     "next": "^15.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "@astro-engine/schema": "*",
     "@astro-engine/ephemeris": "*",
     "@astro-engine/astro-domain": "*",
     "@astro-engine/astro-events": "*",
     "@astro-engine/astro-formatters": "*",
-    "@astro-engine/astro-ui": "*"
+    "@astro-engine/astro-ui": "*",
+    "@astro-engine/schema": "*"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
