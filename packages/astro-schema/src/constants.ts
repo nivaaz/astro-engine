@@ -71,6 +71,7 @@ export const ALL_BODIES: readonly CelestialBody[] = [
   "SUN", "MOON", "MERCURY", "VENUS", "MARS",
   "JUPITER", "SATURN", "URANUS", "NEPTUNE", "PLUTO",
   "NORTH_NODE", "SOUTH_NODE", "CHIRON",
+  "LILITH", "CERES", "PALLAS", "JUNO", "VESTA",
 ] as const;
 
 export const BODY_SYMBOLS: Readonly<Record<CelestialBody, string>> = {
@@ -88,6 +89,11 @@ export const BODY_SYMBOLS: Readonly<Record<CelestialBody, string>> = {
   NORTH_NODE: "☊",
   SOUTH_NODE: "☋",
   CHIRON: "⚷",
+  LILITH: "⚸",
+  CERES: "⚳",
+  PALLAS: "⚴",
+  JUNO: "⚵",
+  VESTA: "⚶",
 };
 
 export const BODY_NAMES: Readonly<Record<CelestialBody, string>> = {
@@ -105,6 +111,11 @@ export const BODY_NAMES: Readonly<Record<CelestialBody, string>> = {
   NORTH_NODE: "North Node",
   SOUTH_NODE: "South Node",
   CHIRON: "Chiron",
+  LILITH: "Lilith",
+  CERES: "Ceres",
+  PALLAS: "Pallas",
+  JUNO: "Juno",
+  VESTA: "Vesta",
 };
 
 export const OUTER_BODIES: ReadonlySet<CelestialBody> = new Set([

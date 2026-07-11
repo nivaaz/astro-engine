@@ -5,7 +5,7 @@
  * detriment, and fall for planets in zodiac signs.
  */
 
-import type { Planet, ZodiacSign } from "./types.js";
+import type { CelestialBody, ZodiacSign } from "./types.js";
 
 // ─── Domicile Rulers ─────────────────────────────────────────────
 
@@ -14,44 +14,44 @@ import type { Planet, ZodiacSign } from "./types.js";
  * Uses classical rulers (Mars rules Scorpio, Jupiter rules Pisces, Saturn rules Aquarius)
  * with modern outer-planet co-rulers noted separately.
  */
-const DOMICILE_RULERS: Record<ZodiacSign, Planet> = {
-  aries: "mars",
-  taurus: "venus",
-  gemini: "mercury",
-  cancer: "moon",
-  leo: "sun",
-  virgo: "mercury",
-  libra: "venus",
-  scorpio: "mars",
-  sagittarius: "jupiter",
-  capricorn: "saturn",
-  aquarius: "saturn",
-  pisces: "jupiter",
+const DOMICILE_RULERS: Record<ZodiacSign, CelestialBody> = {
+  ARIES: "MARS",
+  TAURUS: "VENUS",
+  GEMINI: "MERCURY",
+  CANCER: "MOON",
+  LEO: "SUN",
+  VIRGO: "MERCURY",
+  LIBRA: "VENUS",
+  SCORPIO: "MARS",
+  SAGITTARIUS: "JUPITER",
+  CAPRICORN: "SATURN",
+  AQUARIUS: "SATURN",
+  PISCES: "JUPITER",
 };
 
 /**
  * Modern co-rulers (outer planets) for signs that have them.
  */
-const CO_RULERS: Partial<Record<ZodiacSign, Planet>> = {
-  scorpio: "pluto",
-  aquarius: "uranus",
-  pisces: "neptune",
+const CO_RULERS: Partial<Record<ZodiacSign, CelestialBody>> = {
+  SCORPIO: "PLUTO",
+  AQUARIUS: "URANUS",
+  PISCES: "NEPTUNE",
 };
 
 // ─── Exaltation ──────────────────────────────────────────────────
 
 /**
- * Planets in exaltation by sign.
+ * CelestialBodys in exaltation by sign.
  * Classical exaltation scheme.
  */
-const EXALTATIONS: Partial<Record<ZodiacSign, Planet>> = {
-  aries: "sun",
-  taurus: "moon",
-  cancer: "jupiter",
-  virgo: "mercury",
-  libra: "saturn",
-  capricorn: "mars",
-  pisces: "venus",
+const EXALTATIONS: Partial<Record<ZodiacSign, CelestialBody>> = {
+  ARIES: "SUN",
+  TAURUS: "MOON",
+  CANCER: "JUPITER",
+  VIRGO: "MERCURY",
+  LIBRA: "SATURN",
+  CAPRICORN: "MARS",
+  PISCES: "VENUS",
 };
 
 // ─── Detriment (opposite sign's domicile ruler) ──────────────────
@@ -59,9 +59,9 @@ const EXALTATIONS: Partial<Record<ZodiacSign, Planet>> = {
 /**
  * Signs where a planet is in detriment (opposite its domicile).
  */
-function getDetrimentSigns(planet: Planet): ZodiacSign[] {
+function getDetrimentSigns(planet: CelestialBody): ZodiacSign[] {
   const signs: ZodiacSign[] = [];
-  for (const [sign, ruler] of Object.entries(DOMICILE_RULERS) as [ZodiacSign, Planet][]) {
+  for (const [sign, ruler] of Object.entries(DOMICILE_RULERS) as [ZodiacSign, CelestialBody][]) {
     if (ruler === planet) {
       // The opposite sign
       const oppositeIndex = (((signIndex(sign) + 6) % 12) + 12) % 12;
@@ -76,9 +76,9 @@ function getDetrimentSigns(planet: Planet): ZodiacSign[] {
 /**
  * Signs where a planet is in fall (opposite its exaltation sign).
  */
-function getFallSigns(planet: Planet): ZodiacSign[] {
+function getFallSigns(planet: CelestialBody): ZodiacSign[] {
   const signs: ZodiacSign[] = [];
-  for (const [sign, exalted] of Object.entries(EXALTATIONS) as [ZodiacSign, Planet][]) {
+  for (const [sign, exalted] of Object.entries(EXALTATIONS) as [ZodiacSign, CelestialBody][]) {
     if (exalted === planet) {
       const oppositeIndex = (((signIndex(sign) + 6) % 12) + 12) % 12;
       signs.push(SIGN_BY_INDEX[oppositeIndex]!);
@@ -90,8 +90,8 @@ function getFallSigns(planet: Planet): ZodiacSign[] {
 // ─── Helpers ─────────────────────────────────────────────────────
 
 const ZODIAC_ORDER: readonly ZodiacSign[] = [
-  "aries", "taurus", "gemini", "cancer", "leo", "virgo",
-  "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces",
+  "ARIES", "TAURUS", "GEMINI", "CANCER", "LEO", "VIRGO",
+  "LIBRA", "SCORPIO", "SAGITTARIUS", "CAPRICORN", "AQUARIUS", "PISCES",
 ];
 
 const SIGN_BY_INDEX: readonly ZodiacSign[] = ZODIAC_ORDER;
@@ -101,14 +101,14 @@ function signIndex(sign: ZodiacSign): number {
 }
 
 // Precompute detriment/fall lookup
-const DETRIMENT_MAP = new Map<Planet, Set<ZodiacSign>>();
-const FALL_MAP = new Map<Planet, Set<ZodiacSign>>();
+const DETRIMENT_MAP = new Map<CelestialBody, Set<ZodiacSign>>();
+const FALL_MAP = new Map<CelestialBody, Set<ZodiacSign>>();
 
-const ALL_PLANETS: Planet[] = [
-  "sun", "moon", "mercury", "venus", "mars",
-  "jupiter", "saturn", "uranus", "neptune", "pluto",
-  "chiron", "north_node", "south_node",
-  "lilith", "ceres", "pallas", "juno", "vesta",
+const ALL_PLANETS: CelestialBody[] = [
+  "SUN", "MOON", "MERCURY", "VENUS", "MARS",
+  "JUPITER", "SATURN", "URANUS", "NEPTUNE", "PLUTO",
+  "CHIRON", "NORTH_NODE", "SOUTH_NODE",
+  "LILITH", "CERES", "PALLAS", "JUNO", "VESTA",
 ];
 
 for (const planet of ALL_PLANETS) {
@@ -119,20 +119,20 @@ for (const planet of ALL_PLANETS) {
 // ─── Public API ──────────────────────────────────────────────────
 
 export interface EssentialDignity {
-  readonly planet: Planet;
+  readonly planet: CelestialBody;
   readonly sign: ZodiacSign;
   readonly domicile: boolean;
   readonly exaltation: boolean;
   readonly detriment: boolean;
   readonly fall: boolean;
   readonly coRuler: boolean;
-  readonly ruler: Planet;
+  readonly ruler: CelestialBody;
 }
 
 /**
  * Get the essential dignity status of a planet in a given sign.
  */
-export function getEssentialDignity(planet: Planet, sign: ZodiacSign): EssentialDignity {
+export function getEssentialDignity(planet: CelestialBody, sign: ZodiacSign): EssentialDignity {
   const ruler = DOMICILE_RULERS[sign]!;
   const coRuler = CO_RULERS[sign];
 
@@ -151,13 +151,13 @@ export function getEssentialDignity(planet: Planet, sign: ZodiacSign): Essential
 /**
  * Get the traditional ruler of a zodiac sign.
  */
-export function getRuler(sign: ZodiacSign): Planet {
+export function getRuler(sign: ZodiacSign): CelestialBody {
   return DOMICILE_RULERS[sign]!;
 }
 
 /**
  * Get the modern co-ruler of a sign, if one exists.
  */
-export function getCoRuler(sign: ZodiacSign): Planet | undefined {
+export function getCoRuler(sign: ZodiacSign): CelestialBody | undefined {
   return CO_RULERS[sign];
 }

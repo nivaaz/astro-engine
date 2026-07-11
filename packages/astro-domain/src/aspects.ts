@@ -16,7 +16,7 @@ import type {
   AspectPhase,
 } from "@astro-engine/schema";
 
-import { getAspectType, ASPECT_ANGLES, DEFAULT_ORBS } from "./orbs.js";
+import { getAspectType, ASPECT_ANGLES } from "./orbs.js";
 
 // ─── Helpers ─────────────────────────────────────────────────────
 
@@ -109,7 +109,6 @@ export function detectAspects(
 
       const exactAngle = ASPECT_ANGLES[aspectType]!;
       const orb = Math.abs(angle - exactAngle);
-      const maxOrb = config?.orbOverrides?.[aspectType] ?? DEFAULT_ORBS[aspectType]!;
 
       // Enforce global max orb if configured
       if (config?.maxOrb !== undefined && orb > config.maxOrb) {

@@ -39,7 +39,7 @@ export type ZodiacSign =
 export type CelestialBody =
   | "SUN" | "MOON" | "MERCURY" | "VENUS" | "MARS"
   | "JUPITER" | "SATURN" | "URANUS" | "NEPTUNE" | "PLUTO"
-  | "EARTH" | "NORTH_NODE" | "SOUTH_NODE" | "CHIRON";
+  | "EARTH" | "NORTH_NODE" | "SOUTH_NODE" | "CHIRON" | "LILITH" | "CERES" | "PALLAS" | "JUNO" | "VESTA";
 
 export type AspectType =
   | "CONJUNCTION"

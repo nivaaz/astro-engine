@@ -19,7 +19,7 @@ export type { AspectConfig } from "./aspects.js";
 export { getAspectType, getExactAngle, getDefaultOrb, ALL_ASPECT_TYPES, ASPECT_ANGLES, DEFAULT_ORBS } from "./orbs.js";
 
 // Zodiac utilities
-export { signFromLongitude, normaliseLongitude } from "./zodiac.js";
+export { getSignFromLongitude } from "./zodiac.js";
 
 // Dignities
 export { getEssentialDignity, getRuler } from "./dignities.js";
