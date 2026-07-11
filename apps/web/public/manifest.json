@@ -1,0 +1,10 @@
+{
+  "name": "Astro Engine",
+  "short_name": "Astro",
+  "description": "Open infrastructure for building with astrology",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#7c3aed",
+  "icons": []
+}
