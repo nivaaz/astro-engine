@@ -1,30 +1,25 @@
 {
-  "name": "@astro-engine/web",
+  "name": "@sukara/astro-web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --port 3000",
     "build": "next build",
+    "clean": "rm -rf .next .turbo",
+    "dev": "next dev",
     "start": "next start",
-    "lint": "next lint"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "next": "^15.0.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "@astro-engine/ephemeris": "*",
-    "@astro-engine/astro-domain": "*",
-    "@astro-engine/astro-events": "*",
-    "@astro-engine/astro-formatters": "*",
-    "@astro-engine/astro-ui": "*",
-    "@astro-engine/schema": "*"
+    "@tailwindcss/postcss": "4.3.2",
+    "next": "16.2.10",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "tailwindcss": "4.3.2"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "typescript": "^5.5.0",
-    "tailwindcss": "^4.0.0",
-    "@tailwindcss/postcss": "^4.0.0"
+    "@types/node": "26.1.1",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "typescript": "6.0.3"
   }
 }

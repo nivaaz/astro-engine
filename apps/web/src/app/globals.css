@@ -1,18 +1,86 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-  --muted: #6b7280;
-  --accent: #7c3aed;
-  --accent-light: #a78bfa;
-  --surface: #111111;
-  --border: #1f1f1f;
+  color-scheme: dark;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  background: #10100f;
+  color: #f5f1e8;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: system-ui, -apple-system, sans-serif;
-  -webkit-font-smoothing: antialiased;
+  margin: 0;
+}
+
+main {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 3rem 1.25rem;
+  background:
+    radial-gradient(
+      circle at 15% 10%,
+      rgb(145 116 70 / 18%),
+      transparent 36rem
+    ),
+    #10100f;
+}
+
+section {
+  width: min(100%, 44rem);
+}
+
+.eyebrow,
+.status,
+.boundary {
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.eyebrow {
+  color: #cbb88f;
+}
+
+h1 {
+  margin: 1rem 0;
+  max-width: 12ch;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(3rem, 9vw, 6.5rem);
+  font-weight: 400;
+  letter-spacing: -0.055em;
+  line-height: 0.92;
+}
+
+.summary {
+  max-width: 38rem;
+  color: #c7c2b8;
+  font-size: clamp(1.05rem, 2vw, 1.35rem);
+  line-height: 1.6;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 2rem;
+  color: #dfd3b7;
+}
+
+.status span {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: #d8b46c;
+  box-shadow: 0 0 1rem rgb(216 180 108 / 75%);
+}
+
+.boundary {
+  margin-top: 3rem;
+  max-width: 36rem;
+  color: #76716a;
+  line-height: 1.6;
 }

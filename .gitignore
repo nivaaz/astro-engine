@@ -3,12 +3,26 @@ dist/
 .next/
 .turbo/
 coverage/
+playwright-report/
+test-results/
 *.tsbuildinfo
 
 # Environment
 .env
+.env.*
 .env.local
 .env.*.local
+!.env.example
+
+# Secrets and private licensed assets
+*.key
+*.pem
+*.p12
+*.se1
+*.se2
+*.wasm
+credentials.json
+secrets.*
 
 # OS
 .DS_Store

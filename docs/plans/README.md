@@ -1,0 +1,9 @@
+# Active plans
+
+This is the only active-plan index. Do not execute an unlisted plan.
+
+## Active
+
+- `foundation-public-v1.md` — Foundation + Public V1 delivery program.
+
+Every active plan states status, task class, risk tier, current decision, next action, done criteria, and external gates. Completed plans move to `docs/archive/plans/`.

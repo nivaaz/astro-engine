@@ -1,0 +1,9 @@
+{
+  "name": "Astro Engine",
+  "short_name": "Astro Engine",
+  "description": "Open, deterministic symbolic infrastructure by Sukara.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#10100f",
+  "theme_color": "#10100f"
+}
