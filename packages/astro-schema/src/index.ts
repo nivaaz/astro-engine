@@ -56,6 +56,7 @@ export {
   HumanDesignTransitResultSchema,
   HumanDesignTransitSchema,
   MAX_SATURN_SEARCH_DAYS,
+  MIN_SATURN_ORB_DEGREES,
   SATURN_RETURN_ALGORITHM_VERSION,
   SaturnReturnPassSchema,
   SaturnReturnRequestSchema,

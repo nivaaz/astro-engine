@@ -1,0 +1,57 @@
+{
+  "name": "@sukara/astro-engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "Provider-neutral deterministic astrology domain for Astro Engine",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./aspects": {
+      "types": "./dist/aspects.d.ts",
+      "import": "./dist/aspects.js"
+    },
+    "./current-sky": {
+      "types": "./dist/current-sky.d.ts",
+      "import": "./dist/current-sky.js"
+    },
+    "./events": {
+      "types": "./dist/events.d.ts",
+      "import": "./dist/events.js"
+    },
+    "./identity": {
+      "types": "./dist/identity.d.ts",
+      "import": "./dist/identity.js"
+    },
+    "./positions": {
+      "types": "./dist/positions.d.ts",
+      "import": "./dist/positions.js"
+    },
+    "./saturn-return": {
+      "types": "./dist/saturn-return.d.ts",
+      "import": "./dist/saturn-return.js"
+    },
+    "./whole-sign": {
+      "types": "./dist/whole-sign.d.ts",
+      "import": "./dist/whole-sign.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist .turbo",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@sukara/astro-schema": "0.1.0"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3"
+  }
+}

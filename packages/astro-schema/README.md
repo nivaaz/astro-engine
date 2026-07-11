@@ -13,3 +13,4 @@ Contract conventions:
 - Intervals are half-open: `[start, end)`.
 - Canonical objects exclude processing-time metadata; arrays use the published rank constants.
 - Birth-derived inputs and outputs are classified `session-personal` and may not be persisted or logged.
+- Saturn-return requests use a bounded `0.5°..3°` orb so the versioned physical-motion search contract can guarantee window detection.

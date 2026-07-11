@@ -9,6 +9,7 @@ import {
 
 export const SESSION_PERSONAL_CLASSIFICATION = "session-personal" as const;
 export const MAX_SATURN_SEARCH_DAYS = 35 * 366;
+export const MIN_SATURN_ORB_DEGREES = 0.5;
 export const SATURN_RETURN_ALGORITHM_VERSION = "saturn-return-v1" as const;
 
 export const SaturnReturnRequestSchema = z
@@ -18,7 +19,7 @@ export const SaturnReturnRequestSchema = z
     birthInstant: UtcInstantSchema,
     asOf: UtcInstantSchema,
     searchWindow: UtcIntervalSchema,
-    orb: DegreesSchema.max(3),
+    orb: DegreesSchema.min(MIN_SATURN_ORB_DEGREES).max(3),
   })
   .strict()
   .refine(
@@ -86,7 +87,7 @@ export const SaturnReturnResultSchema = z
     algorithmVersion: z.literal(SATURN_RETURN_ALGORITHM_VERSION),
     classification: z.literal(SESSION_PERSONAL_CLASSIFICATION),
     natalSaturnLongitude: EclipticLongitudeDegreesSchema,
-    orb: DegreesSchema.max(3),
+    orb: DegreesSchema.min(MIN_SATURN_ORB_DEGREES).max(3),
     asOf: UtcInstantSchema,
     status: z.enum(["upcoming", "active", "complete", "none-in-range"]),
     statusWindowId: z
