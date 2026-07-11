@@ -3,60 +3,31 @@
  *
  * Default orb tolerances for each aspect type and helpers
  * for mapping angles to aspect types.
+ *
+ * Updated to use UPPERCASE aspect types from Mirror Mindset conventions.
  */
 
-import type { AspectType } from "./types.js";
+import type { AspectType } from "@astro-engine/schema";
+import { ASPECT_ANGLES, DEFAULT_ORBS } from "@astro-engine/schema";
 
-/**
- * Default maximum orb (in degrees) for each aspect type.
- * Based on traditional/Ptolemy-derived values.
- */
-export const DEFAULT_ORBS: Record<AspectType, number> = {
-  conjunction: 10,
-  opposition: 10,
-  trine: 8,
-  square: 8,
-  sextile: 6,
-  quincunx: 3,
-  semi_sextile: 2,
-  semi_square: 2,
-  sesquiquadrate: 2,
-  quintile: 2,
-  bi_quintile: 2,
-};
-
-/**
- * Exact angle (in degrees) for each aspect type.
- */
-export const ASPECT_ANGLES: Record<AspectType, number> = {
-  conjunction: 0,
-  opposition: 180,
-  trine: 120,
-  square: 90,
-  sextile: 60,
-  quincunx: 150,
-  semi_sextile: 30,
-  semi_square: 45,
-  sesquiquadrate: 135,
-  quintile: 72,
-  bi_quintile: 144,
-};
+// Re-export for convenience
+export { ASPECT_ANGLES, DEFAULT_ORBS };
 
 /**
  * All known aspect types, ordered by angle for deterministic iteration.
  */
 export const ALL_ASPECT_TYPES: readonly AspectType[] = [
-  "conjunction",
-  "semi_sextile",
-  "semi_square",
-  "sextile",
-  "quintile",
-  "square",
-  "trine",
-  "bi_quintile",
-  "sesquiquadrate",
-  "quincunx",
-  "opposition",
+  "CONJUNCTION",
+  "SEMI_SEXTILE",
+  "SEMI_SQUARE",
+  "SEXTILE",
+  "QUINTILE",
+  "SQUARE",
+  "TRINE",
+  "BI_QUINTILE",
+  "SESQUIQUADRATE",
+  "QUINCUNX",
+  "OPPOSITION",
 ];
 
 /**
