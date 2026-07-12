@@ -2,7 +2,7 @@
 
 ## Locked posture
 
-Sukara intends to use a commercial Swiss Ephemeris licence. Signed terms have not yet been confirmed for this delivery program.
+The owner reports that the Swiss Ephemeris Professional licence has been paid and countersigned. The contract itself and any Swiss assets remain outside this public repository; private release evidence must be stored securely.
 
 Until that confirmation and explicit release approval:
 
