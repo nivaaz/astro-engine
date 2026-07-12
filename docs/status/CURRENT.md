@@ -49,3 +49,10 @@
 - Security: no restricted Swiss assets, adapter code, secrets, or direct-source boundary violations found; no open local P0/P1; two moderate Next-bundled PostCSS advisories remain accepted pending a compatible upstream fix
 - Local disposition: Foundation + Public V1 is technically ready in the provider-neutral sense; synthetic fixtures prove deterministic contracts and complete product flows, not scientific production accuracy
 - External release blocks: authorized private adapter and secrets, licensed golden-fixture validation, private-provider latency qualification, hosted CI/CodeQL/Gitleaks results, and explicit owner approval for deployment/publication. Owner reports signed Swiss terms; the contract remains private and is not committed here.
+
+## Deployment configuration — 12 July 2026
+
+- Vercel project `astro-engine` (`prj_1coCbTdVD6VgJ7CzvzumjSGpYeyx`) now uses Root Directory `apps/web` with the Next.js preset.
+- The project uses a Turbo-filtered workspace build (`@sukara/astro-web`) and no longer relies on a root-level `.next` copy workaround.
+- Preview deployment remains SSO-protected and provider-neutral; no Swiss assets or secrets are configured.
+- Verification of the new project settings requires a successful preview deployment from the linked repository; production promotion remains an explicit owner action.

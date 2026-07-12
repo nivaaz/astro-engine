@@ -1,5 +1,0 @@
-{
-  "framework": "nextjs",
-  "installCommand": "npm ci --engine-strict=false",
-  "buildCommand": "npm run build && rm -rf .next && cp -R apps/web/.next .next"
-}
