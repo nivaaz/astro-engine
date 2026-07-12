@@ -26,6 +26,7 @@
     "test:boundaries": "vitest run tests/foundation",
     "typecheck": "turbo run typecheck",
     "audit:dependencies": "npm audit --audit-level=high",
+    "performance:web": "node scripts/check-web-bundle.mjs",
     "verify": "npm run format:check && npm run typecheck && npm run lint && npm run test && npm run build"
   },
   "devDependencies": {

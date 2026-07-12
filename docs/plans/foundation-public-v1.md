@@ -1,10 +1,10 @@
 # Foundation + Public V1
 
-- Status: In progress — Wave D release-readiness review
+- Status: Locally complete — external scientific and release gates remain closed
 - Task class: T2, with T3 release/licence gates
 - Risk tier: High; Critical for licensing and public release
 - Current decision: foundation and provider-neutral contracts/computation are green; commercial Swiss and public release gates remain closed
-- Next action: run Wave D integration, security, performance, package, and release-readiness review without crossing the external licence or publication gates
+- Next action: obtain signed terms and owner authority, integrate the authorized private adapter, validate licensed goldens/provider performance, and attach hosted CI/security evidence before any public release
 
 ## Stages
 

@@ -6,9 +6,11 @@ Astro Engine provides astronomical coordinates, timing, relationships, provenanc
 
 ## Current state
 
-The repository is in the Foundation + Public V1 program. The foundation is intentionally small while canonical contracts and independently validated computation are rebuilt.
+Foundation + Public V1 is locally complete in the provider-neutral sense. The repository contains canonical contracts, deterministic domain algorithms, Human Design transit gates/lines, formatters, a private smoke CLI, server-only provider composition, and an installable no-account PWA. Synthetic fixtures prove contracts and product flows; they are never represented as current astronomy.
 
 Public deployment, package publication, and Swiss Ephemeris distribution are blocked until signed commercial terms and explicit release approval are confirmed.
+
+Production astronomical accuracy also remains gated on the authorized private adapter, licensed golden-fixture validation, provider performance qualification, and hosted CI/security evidence.
 
 ## Development
 

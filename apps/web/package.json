@@ -10,8 +10,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@sukara/astro-engine": "0.1.0",
     "@sukara/astro-formatters": "0.1.0",
     "@sukara/astro-schema": "0.1.0",
+    "@sukara/human-design": "0.1.0",
     "@tailwindcss/postcss": "4.3.2",
     "next": "16.2.10",
     "react": "19.2.7",

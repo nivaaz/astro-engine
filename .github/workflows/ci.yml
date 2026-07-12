@@ -24,6 +24,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run verify
+      - run: npm run performance:web
       - run: npm run audit:dependencies
 
   browser-smoke:

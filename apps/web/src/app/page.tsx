@@ -1,25 +1,21 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import {
-  formatJson,
-  formatMarkdown,
-  formatPromptText,
-} from "@sukara/astro-formatters";
-import {
-  EastLongitudeDegreesSchema,
-  IanaTimezoneSchema,
-  LatitudeDegreesSchema,
-  UtcInstantSchema,
-  type MajorEvent,
-  type UtcInstant,
+import type {
+  CurrentSky,
+  EventSearchResult,
+  HumanDesignTransitResult,
+  MajorEvent,
+  SaturnReturnResult,
+  UtcInstant,
+  WholeSignChart,
 } from "@sukara/astro-schema";
 import {
-  SkyTransportResponseSchema,
+  parseSkyTransportResponse,
   type SkyTransportResponse,
 } from "../lib/sky-transport";
 
-type DataMode = "loading" | "fixture" | "unavailable" | "error";
+type DataMode = "loading" | "fixture" | "provider" | "unavailable" | "error";
 
 type SkyPayload = SkyTransportResponse;
 
@@ -56,11 +52,18 @@ const EMPTY_LOCATION = {
 function validLocalContext(
   input: Readonly<{ latitude: string; longitude: string; timezone: string }>,
 ): boolean {
-  return (
-    LatitudeDegreesSchema.safeParse(Number(input.latitude)).success &&
-    EastLongitudeDegreesSchema.safeParse(Number(input.longitude)).success &&
-    IanaTimezoneSchema.safeParse(input.timezone).success
-  );
+  const latitude = Number(input.latitude);
+  const longitude = Number(input.longitude);
+  if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90)
+    return false;
+  if (!Number.isFinite(longitude) || longitude < -180 || longitude > 180)
+    return false;
+  try {
+    new Intl.DateTimeFormat("en", { timeZone: input.timezone }).format();
+    return input.timezone === "UTC" || input.timezone.includes("/");
+  } catch {
+    return false;
+  }
 }
 
 function formatDegree(value: number): string {
@@ -81,6 +84,68 @@ function formatTime(value: string, timezone?: string): string {
       timeZone: "UTC",
     }).format(new Date(value));
   }
+}
+
+function localCivilToUtc(
+  date: string,
+  time: string,
+  timezone: string,
+): UtcInstant | null {
+  const [year, month, day] = date.split("-").map(Number);
+  const [hour, minute] = time.split(":").map(Number);
+  if ([year, month, day, hour, minute].some((part) => !Number.isFinite(part)))
+    return null;
+  let guess = Date.UTC(year!, month! - 1, day!, hour!, minute!);
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const parts = Object.fromEntries(
+      new Intl.DateTimeFormat("en-CA", {
+        timeZone: timezone,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hourCycle: "h23",
+      })
+        .formatToParts(new Date(guess))
+        .map(({ type, value }) => [type, value]),
+    );
+    const represented = Date.UTC(
+      Number(parts["year"]),
+      Number(parts["month"]) - 1,
+      Number(parts["day"]),
+      Number(parts["hour"]),
+      Number(parts["minute"]),
+      Number(parts["second"]),
+    );
+    guess -= represented - Date.UTC(year!, month! - 1, day!, hour!, minute!);
+  }
+  return new Date(guess).toISOString() as UtcInstant;
+}
+
+async function postOperation<T>(input: unknown): Promise<T> {
+  const response = await fetch("/api/sky", {
+    method: "POST",
+    cache: "no-store",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  const body: unknown = await response.json();
+  return providerEnvelopeValue<T>(body, response.ok);
+}
+
+function providerEnvelopeValue<T>(body: unknown, responseOk = true): T {
+  if (
+    !responseOk ||
+    typeof body !== "object" ||
+    body === null ||
+    !("ok" in body) ||
+    body.ok !== true ||
+    !("value" in body)
+  )
+    throw new Error("Calculation unavailable");
+  return body.value as T;
 }
 
 function eventLabel(event: MajorEvent): string {
@@ -117,30 +182,56 @@ export default function HomePage() {
   });
   const [copyState, setCopyState] = useState("Copy");
   const [personalOpen, setPersonalOpen] = useState(false);
+  const [wholeSign, setWholeSign] = useState<WholeSignChart | null>(null);
+  const [saturnReturn, setSaturnReturn] = useState<SaturnReturnResult | null>(
+    null,
+  );
+  const [calculationMessage, setCalculationMessage] = useState("");
 
   useEffect(() => {
-    fetch("/api/sky", { cache: "no-store" })
-      .then(async (response) => {
+    void (async () => {
+      try {
+        const response = await fetch("/api/sky", { cache: "no-store" });
         const body: unknown = await response.json();
-        const parsed = SkyTransportResponseSchema.safeParse(body);
-        if (!response.ok || !parsed.success) {
-          setMode("unavailable");
-          setMessage(
-            "The licensed calculation provider is not configured for this environment.",
-          );
+        const parsed = parseSkyTransportResponse(body);
+        if (response.ok && parsed !== null) {
+          setPayload(parsed);
+          setReferenceInstant(new Date().toISOString() as UtcInstant);
+          setMode(parsed.mode);
+          setMessage("Fixture data loaded for interface verification.");
           return;
         }
-        setPayload(parsed.data);
-        setReferenceInstant(UtcInstantSchema.parse(new Date().toISOString()));
-        setMode("fixture");
-        setMessage("Fixture data loaded for interface verification.");
-      })
-      .catch(() => {
+        const currentSky = providerEnvelopeValue<CurrentSky>(body, response.ok);
+        const instant = currentSky.metadata.calculatedAt;
+        const end = new Date(
+          Date.parse(instant) + 30 * 86_400_000,
+        ).toISOString();
+        const [upcomingEvents, humanDesign] = await Promise.all([
+          postOperation<EventSearchResult>({
+            operation: "events",
+            request: { window: { start: instant, end }, limit: 100 },
+          }),
+          postOperation<HumanDesignTransitResult>({
+            operation: "human-design",
+            instant,
+          }),
+        ]);
+        setPayload({
+          mode: "provider",
+          currentSky,
+          upcomingEvents,
+          humanDesign,
+        });
+        setReferenceInstant(new Date().toISOString() as UtcInstant);
+        setMode("provider");
+        setMessage("Provider data loaded with canonical provenance.");
+      } catch {
         setMode("error");
         setMessage(
-          "The sky data request failed. Check your connection and try again.",
+          "The licensed calculation provider is not configured for this environment.",
         );
-      });
+      }
+    })();
   }, []);
 
   const stale =
@@ -164,29 +255,38 @@ export default function HomePage() {
       ? "Stale"
       : mode === "fixture"
         ? "Fixture"
-        : mode === "loading"
-          ? "Loading"
-          : "Unavailable";
+        : mode === "provider"
+          ? "Current"
+          : mode === "loading"
+            ? "Loading"
+            : "Unavailable";
 
   async function copy(format: "plain" | "markdown" | "json") {
     if (!payload) return;
-    const output =
-      format === "json"
-        ? formatJson(payload.currentSky, {
-            referenceInstant:
-              referenceInstant ?? payload.currentSky.metadata.calculatedAt,
-          })
-        : format === "markdown"
-          ? formatMarkdown(payload.currentSky, {
-              referenceInstant:
-                referenceInstant ?? payload.currentSky.metadata.calculatedAt,
-            })
-          : formatPromptText(payload.currentSky, {
-              referenceInstant:
-                referenceInstant ?? payload.currentSky.metadata.calculatedAt,
-            });
     try {
-      await navigator.clipboard.writeText(output);
+      const response = await fetch("/api/format", {
+        method: "POST",
+        cache: "no-store",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          format,
+          value: payload.currentSky,
+          referenceInstant:
+            referenceInstant ?? payload.currentSky.metadata.calculatedAt,
+        }),
+      });
+      const body: unknown = await response.json();
+      if (
+        !response.ok ||
+        typeof body !== "object" ||
+        body === null ||
+        !("ok" in body) ||
+        body.ok !== true ||
+        !("output" in body) ||
+        typeof body.output !== "string"
+      )
+        throw new Error("Format failed");
+      await navigator.clipboard.writeText(body.output);
       setCopyState(
         `${format === "json" ? "JSON" : format === "markdown" ? "Markdown" : "Plain text"} copied`,
       );
@@ -211,6 +311,64 @@ export default function HomePage() {
         setMessage("Location was not available. Enter coordinates manually."),
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 },
     );
+  }
+
+  async function calculateLocalStructure() {
+    if (!locationValid) return;
+    setCalculationMessage("Calculating local structure…");
+    try {
+      const value = await postOperation<WholeSignChart>({
+        operation: "whole-sign",
+        instant: new Date().toISOString(),
+        location: {
+          latitude: Number(location.latitude),
+          longitude: Number(location.longitude),
+          timezone: location.timezone,
+        },
+      });
+      setWholeSign(value);
+      setCalculationMessage(
+        "Whole Sign structure calculated from fixture coordinates.",
+      );
+    } catch {
+      setCalculationMessage(
+        "Local structure is unavailable without a configured provider.",
+      );
+    }
+  }
+
+  async function calculateReturn() {
+    if (!birthValid) return;
+    const birthInstant = localCivilToUtc(
+      birth.date,
+      birth.time,
+      birth.timezone,
+    );
+    if (birthInstant === null) {
+      setCalculationMessage("Birth time could not be resolved.");
+      return;
+    }
+    const asOf = new Date();
+    const start = new Date(asOf);
+    start.setUTCFullYear(start.getUTCFullYear() - 4);
+    const end = new Date(asOf);
+    end.setUTCFullYear(end.getUTCFullYear() + 4);
+    setCalculationMessage("Calculating bounded Saturn-return windows…");
+    try {
+      const value = await postOperation<SaturnReturnResult>({
+        operation: "saturn-return",
+        birthInstant,
+        asOf: asOf.toISOString(),
+        searchWindow: { start: start.toISOString(), end: end.toISOString() },
+        orb: 2,
+      });
+      setSaturnReturn(value);
+      setCalculationMessage("Saturn-return fixture calculation complete.");
+    } catch {
+      setCalculationMessage(
+        "Saturn return is unavailable without a configured provider.",
+      );
+    }
   }
 
   return (
@@ -342,12 +500,29 @@ export default function HomePage() {
           >
             Use my location
           </button>
+          <button
+            className="button secondary"
+            type="button"
+            onClick={calculateLocalStructure}
+            disabled={
+              !locationValid || (mode !== "fixture" && mode !== "provider")
+            }
+          >
+            Calculate Whole Sign
+          </button>
         </div>
         <p className={`field-note ${locationValid ? "valid" : ""}`}>
           {locationValid
             ? "Local context ready · held in this tab only"
             : "Enter coordinates or use browser geolocation"}
         </p>
+        {wholeSign && (
+          <p className="field-note valid" role="status">
+            Ascendant {formatDegree(wholeSign.ascendant)} · first house{" "}
+            {title(wholeSign.firstHouseSign)} · Midheaven{" "}
+            {formatDegree(wholeSign.midheaven)}
+          </p>
+        )}
       </section>
 
       <section className="data-section" id="sky" aria-labelledby="sky-title">
@@ -469,7 +644,13 @@ export default function HomePage() {
             {personalOpen ? "Close inputs" : "Enter birth data"}
           </button>
           {personalOpen && (
-            <form className="birth-form" onSubmit={(e) => e.preventDefault()}>
+            <form
+              className="birth-form"
+              onSubmit={(e) => {
+                e.preventDefault();
+                void calculateReturn();
+              }}
+            >
               <label>
                 Date
                 <input
@@ -515,17 +696,46 @@ export default function HomePage() {
                   }
                 />
               </label>
-              <button className="button wide" type="submit" disabled>
-                Licensed provider required
+              <button
+                className="button wide"
+                type="submit"
+                disabled={
+                  !birthValid || (mode !== "fixture" && mode !== "provider")
+                }
+              >
+                Calculate Saturn return
               </button>
               <p className="wide privacy-note">
-                {birthValid
-                  ? "Inputs are ready but cannot be calculated in this environment. "
-                  : "Complete the inputs to prepare a future session calculation. "}
-                This form does not transmit while the licensed provider is
-                unavailable. Closing or refreshing the tab clears the values.
+                {mode === "fixture" || mode === "provider"
+                  ? `${mode === "fixture" ? "Fixture" : "Provider"} calculations send inputs once to the no-store server route. `
+                  : "The form does not transmit while the licensed provider is unavailable. "}
+                Inputs are never logged or persisted. Closing or refreshing the
+                tab clears the values.
               </p>
+              {saturnReturn && (
+                <div className="wide privacy-note" role="status">
+                  <strong>{title(saturnReturn.status)}</strong> ·{" "}
+                  {saturnReturn.windows.length} bounded window
+                  {saturnReturn.windows.length === 1 ? "" : "s"} ·{" "}
+                  {saturnReturn.windows.reduce(
+                    (count, window) => count + window.passes.length,
+                    0,
+                  )}{" "}
+                  exact pass
+                  {saturnReturn.windows.reduce(
+                    (count, window) => count + window.passes.length,
+                    0,
+                  ) === 1
+                    ? ""
+                    : "es"}
+                </div>
+              )}
             </form>
+          )}
+          {calculationMessage && (
+            <p className="privacy-note" aria-live="polite">
+              {calculationMessage}
+            </p>
           )}
         </article>
         <article className="hd-card" id="human-design">

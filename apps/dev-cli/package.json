@@ -5,6 +5,10 @@
   "type": "module",
   "license": "UNLICENSED",
   "description": "Private local smoke consumer for canonical Astro Engine output",
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "clean": "rm -rf dist .turbo",

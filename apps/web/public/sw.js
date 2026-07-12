@@ -1,4 +1,5 @@
 const SHELL_CACHE = "astro-engine-shell-v1";
+const CACHE_PREFIX = "astro-engine-shell-";
 const SHELL = ["/", "/manifest.webmanifest", "/icon"];
 
 self.addEventListener("install", (event) => {
@@ -14,7 +15,9 @@ self.addEventListener("activate", (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter((key) => key !== SHELL_CACHE)
+            .filter(
+              (key) => key.startsWith(CACHE_PREFIX) && key !== SHELL_CACHE,
+            )
             .map((key) => caches.delete(key)),
         ),
       ),
@@ -23,8 +26,14 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
-  if (event.request.method !== "GET" || url.pathname.startsWith("/api/"))
-    return;
+  const cacheable =
+    url.origin === self.location.origin &&
+    url.search === "" &&
+    (event.request.mode === "navigate" ||
+      url.pathname.startsWith("/_next/static/") ||
+      url.pathname === "/manifest.webmanifest" ||
+      url.pathname === "/icon");
+  if (event.request.method !== "GET" || !cacheable) return;
   event.respondWith(
     fetch(event.request)
       .then((response) => {

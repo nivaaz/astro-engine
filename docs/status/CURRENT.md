@@ -39,3 +39,13 @@
 - Performance observation: all emitted JS/CSS chunks total 262,716 bytes gzip across framework and routes; route-specific budget attribution remains a Wave D release review item
 - Residual risk: the PWA cannot produce live astronomical or personal results until the licensed private provider is configured; no production data is estimated or substituted
 - External hold: signed Swiss terms, private adapter/goldens, public deployment, and package publication remain blocked pending owner approval
+
+## Wave D — Integration and release readiness
+
+- State: Locally accepted on 12 July 2026; independent security, performance, and release reviews report no open local P0/P1 findings
+- Delivered: injectable server-only provider composition for current sky, bounded events, Whole Sign, Saturn return, and Human Design; production fail-closed resolver; executable labelled fixture flows; server canonical formatting; response security policy; narrow offline shell cache; package and performance gates
+- Evidence: 80 unit/contract/server tests and 10 desktop/mobile Playwright tests passed; clean install, full verify/build, high-severity dependency audit, package dry-runs, CLI smoke, and diff checks passed
+- Performance: final production route measured 145,054 transferred JavaScript bytes and 150,670 bytes gzip by the conservative checked-in CI gate, below the 180 KiB budget; profiled mobile LCP p95 was 588 ms; maximum-window provider-neutral computation p95 stayed below 121 ms
+- Security: no restricted Swiss assets, adapter code, secrets, or direct-source boundary violations found; no open local P0/P1; two moderate Next-bundled PostCSS advisories remain accepted pending a compatible upstream fix
+- Local disposition: Foundation + Public V1 is technically ready in the provider-neutral sense; synthetic fixtures prove deterministic contracts and complete product flows, not scientific production accuracy
+- External release blocks: signed Swiss terms, authorized private adapter and secrets, licensed golden-fixture validation, private-provider latency qualification, hosted CI/CodeQL/Gitleaks results, and explicit owner approval for deployment/publication

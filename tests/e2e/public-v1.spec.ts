@@ -55,7 +55,14 @@ test("fixture-labelled public V1 does not persist personal inputs", async ({
 });
 
 test("manifest and service worker are available", async ({ page }) => {
-  await page.goto("/");
+  const response = await page.goto("/");
+  expect(response?.headers()["content-security-policy"]).toContain(
+    "frame-ancestors 'none'",
+  );
+  expect(response?.headers()["permissions-policy"]).toContain(
+    "geolocation=(self)",
+  );
+  expect(response?.headers()["x-content-type-options"]).toBe("nosniff");
   await expect(page.locator('link[rel="manifest"]')).toHaveAttribute(
     "href",
     "/manifest.webmanifest",
@@ -112,4 +119,36 @@ test("invalid local context is not labelled ready and clipboard failures are ann
   await expect(page.locator(".copy-group").getByRole("status")).toContainText(
     "Copy failed",
   );
+});
+
+test("fixture provider executes Whole Sign and Saturn-return session flows", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("Latitude").first().fill("-33.8688");
+  await page.getByLabel("Longitude").first().fill("151.2093");
+  await page.getByLabel("Timezone").first().fill("Australia/Sydney");
+  await page.getByRole("button", { name: "Calculate Whole Sign" }).click();
+  await expect(page.getByText(/Ascendant .* first house/i)).toBeVisible();
+
+  await page.getByRole("button", { name: "Enter birth data" }).click();
+  await page.getByLabel("Date").fill("1996-01-01");
+  await page.getByLabel("Local time").fill("12:00");
+  await page.getByLabel("Latitude").last().fill("-33.8688");
+  await page.getByLabel("Longitude").last().fill("151.2093");
+  await page.getByLabel("Timezone").last().fill("Australia/Sydney");
+  const responsePromise = page.waitForResponse(
+    (response) =>
+      response.url().endsWith("/api/sky") &&
+      response.request().method() === "POST" &&
+      response.request().postData()?.includes("saturn-return") === true,
+  );
+  await page.getByRole("button", { name: "Calculate Saturn return" }).click();
+  const response = await responsePromise;
+  expect(response.ok()).toBe(true);
+  expect(response.headers()["cache-control"]).toContain("no-store");
+  await expect(
+    page.getByText("Saturn-return fixture calculation complete."),
+  ).toBeVisible();
+  await expect(page.getByText(/bounded window/i)).toBeVisible();
 });
