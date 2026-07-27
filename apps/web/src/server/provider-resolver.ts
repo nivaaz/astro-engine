@@ -1,5 +1,6 @@
 import type { EphemerisProvider } from "@sukara/astro-schema";
 import { uiFixtureProvider } from "./ui-fixture-provider";
+import { resolveSwissEphemerisProvider } from "./private/swiss-provider";
 
 export type ProviderResolver = () =>
   EphemerisProvider | null | Promise<EphemerisProvider | null>;
@@ -12,4 +13,6 @@ export const resolveEphemerisProvider: ProviderResolver = () =>
   process.env["ASTRO_ENGINE_FIXTURE_MODE"] === "true" &&
   process.env["NODE_ENV"] !== "production"
     ? uiFixtureProvider()
-    : null;
+    : process.env["ASTRO_ENGINE_PROVIDER"] === "swisseph"
+      ? resolveSwissEphemerisProvider()
+      : null;

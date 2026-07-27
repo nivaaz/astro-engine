@@ -24,8 +24,10 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "test:boundaries": "vitest run tests/foundation",
+    "private:ephemeris": "node scripts/fetch-swiss-ephemeris.mjs",
+    "validate:swiss": "node scripts/validate-swiss-provider.mjs",
     "typecheck": "turbo run typecheck",
-    "audit:dependencies": "npm audit --audit-level=high",
+    "audit:dependencies": "npm audit --omit=dev --audit-level=high",
     "performance:web": "node scripts/check-web-bundle.mjs",
     "verify": "npm run format:check && npm run typecheck && npm run lint && npm run test && npm run build"
   },
@@ -46,7 +48,11 @@
   "packageManager": "npm@11.16.0",
   "allowScripts": {
     "fsevents": false,
-    "sharp@0.34.5": true,
+    "sharp@0.35.3": true,
     "unrs-resolver@1.12.2": true
+  },
+  "overrides": {
+    "postcss": "8.5.23",
+    "sharp": "0.35.3"
   }
 }

@@ -3,8 +3,8 @@
 - Status: Locally complete — external scientific and release gates remain closed
 - Task class: T2, with T3 release/licence gates
 - Risk tier: High; Critical for licensing and public release
-- Current decision: foundation and provider-neutral contracts/computation are green; commercial Swiss and public release gates remain closed
-- Next action: obtain signed terms and owner authority, integrate the authorized private adapter, validate licensed goldens/provider performance, and attach hosted CI/security evidence before any public release
+- Current decision: foundation and provider-neutral contracts/computation are green; signed Swiss terms authorize the private server-only adapter and licensed validation
+- Next action: complete provider-enabled preview tracing, hosted CI/security evidence, performance qualification, and explicit production/package-publication approval
 
 ## Stages
 

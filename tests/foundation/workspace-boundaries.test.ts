@@ -8,7 +8,8 @@ function sourceFiles(directory: string): string[] {
   if (!existsSync(directory)) return [];
 
   return readdirSync(directory).flatMap((entry) => {
-    if ([".next", ".turbo", "dist", "node_modules"].includes(entry)) return [];
+    if ([".next", ".turbo", ".private", "dist", "node_modules"].includes(entry))
+      return [];
     const absolute = path.join(directory, entry);
     return statSync(absolute).isDirectory()
       ? sourceFiles(absolute)
@@ -22,7 +23,8 @@ function allFiles(directory: string): string[] {
   if (!existsSync(directory)) return [];
 
   return readdirSync(directory).flatMap((entry) => {
-    if ([".next", ".turbo", "dist", "node_modules"].includes(entry)) return [];
+    if ([".next", ".turbo", ".private", "dist", "node_modules"].includes(entry))
+      return [];
     const absolute = path.join(directory, entry);
     return statSync(absolute).isDirectory() ? allFiles(absolute) : [absolute];
   });
@@ -74,6 +76,11 @@ describe("foundation boundaries", () => {
     const files = trackedRoots.flatMap(allFiles);
 
     expect(files.filter((file) => restrictedExtensions.test(file))).toEqual([]);
+  });
+
+  it("keeps private ephemeris data outside source tracking", () => {
+    const gitignore = readFileSync(path.join(root, ".gitignore"), "utf8");
+    expect(gitignore).toContain("apps/web/.private/");
   });
 
   it("keeps workspace package exports and dependencies explicit", () => {

@@ -32,7 +32,8 @@ const MAX_ABSOLUTE_LONGITUDE_SPEED: Readonly<Record<EphemerisBody, number>> = {
   uranus: 0.1,
   neptune: 0.1,
   pluto: 0.1,
-  "true-north-node": 0.2,
+  // Swiss true-node motion can exceed 0.2 deg/day near its fastest motion.
+  "true-north-node": 0.3,
 };
 
 function runtimeFailure(options?: ProviderCallOptions): AstroResult<never> {

@@ -8,6 +8,7 @@ import { resolveEphemerisProvider } from "../../../server/provider-resolver";
 import { createAstroRouteHandlers } from "../../../server/route-factory";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 const providerHandlers = createAstroRouteHandlers(resolveEphemerisProvider);
 

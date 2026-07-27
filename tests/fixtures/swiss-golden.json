@@ -1,0 +1,60 @@
+{
+  "reference": {
+    "provider": "Swiss Ephemeris swetest",
+    "version": "2.10.03",
+    "upstreamRevision": "56e8eef0ed61c9ef4b832cb4b87af776665b30fd",
+    "command": "swetest -edir<ephe> -b1.1.2025 -ut00:00 -house0,51.5,W -p0123456789t -fPls",
+    "tolerance": {
+      "longitudeDegrees": 1e-6,
+      "longitudeSpeedDegreesPerDay": 1e-6,
+      "angleDegrees": 1e-6,
+      "eventSeconds": 1
+    }
+  },
+  "instant": "2025-01-01T00:00:00.000Z",
+  "positions": {
+    "sun": { "longitude": 280.8136107, "longitudeSpeed": 1.0196486 },
+    "moon": { "longitude": 293.9135799, "longitudeSpeed": 13.4441226 },
+    "mercury": { "longitude": 259.869978, "longitudeSpeed": 1.2864396 },
+    "venus": { "longitude": 327.7121094, "longitudeSpeed": 1.0736213 },
+    "mars": { "longitude": 121.9179228, "longitudeSpeed": -0.3279947 },
+    "jupiter": { "longitude": 73.2154607, "longitudeSpeed": -0.1064656 },
+    "saturn": { "longitude": 344.5240707, "longitudeSpeed": 0.0756229 },
+    "uranus": { "longitude": 53.6358278, "longitudeSpeed": -0.024377 },
+    "neptune": { "longitude": 357.2978224, "longitudeSpeed": 0.0138063 },
+    "pluto": { "longitude": 301.0648111, "longitudeSpeed": 0.0306955 },
+    "true-north-node": {
+      "longitude": 0.8772354,
+      "longitudeSpeed": -0.2022348
+    }
+  },
+  "angles": {
+    "latitude": 51.5,
+    "longitude": 0,
+    "ascendant": 187.6866232,
+    "midheaven": 100.0192717
+  },
+  "eventTiming": {
+    "window": {
+      "start": "2025-01-01T00:00:00.000Z",
+      "end": "2025-04-01T00:00:00.000Z"
+    },
+    "firstExactAt": "2025-01-01T06:02:09.529Z",
+    "firstKind": "aspect"
+  },
+  "saturnReturn": {
+    "birthInstant": "1996-01-01T00:00:00.000Z",
+    "natalSaturnLongitude": 349.39534159220875,
+    "asOf": "2025-01-01T00:00:00.000Z",
+    "searchWindow": {
+      "start": "2025-01-01T00:00:00.000Z",
+      "end": "2030-01-01T00:00:00.000Z"
+    },
+    "orb": 1,
+    "status": "upcoming",
+    "window": {
+      "start": "2025-02-09T17:03:48.625Z",
+      "end": "2025-02-26T14:13:57.048Z"
+    }
+  }
+}

@@ -34,6 +34,10 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   outputFileTracingRoot: repositoryRoot,
+  serverExternalPackages: ["sweph"],
+  outputFileTracingIncludes: {
+    "/api/sky": ["./.private/ephemeris/**/*"],
+  },
   turbopack: {
     root: repositoryRoot,
   },

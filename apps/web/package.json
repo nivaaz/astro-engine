@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "next build",
+    "build": "next build --webpack",
     "clean": "rm -rf .next .turbo",
     "dev": "next dev",
     "start": "next start",
@@ -15,10 +15,11 @@
     "@sukara/astro-schema": "0.1.0",
     "@sukara/human-design": "0.1.0",
     "@tailwindcss/postcss": "4.3.2",
-    "next": "16.2.10",
+    "next": "16.2.12",
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "tailwindcss": "4.3.2",
+    "sweph": "2.10.3-7",
     "zod": "4.4.3"
   },
   "devDependencies": {
