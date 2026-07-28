@@ -165,6 +165,18 @@ describe("canonical formatters", () => {
     expect(output).not.toContain("109.123456789");
   });
 
+  it("omits local structure when no Whole Sign chart is supplied", () => {
+    const output = formatAiChartCopy({
+      chartType: "Event",
+      date: currentSky.metadata.calculatedAt,
+      currentSky,
+    });
+
+    expect(output).not.toContain("House system: Whole Sign");
+    expect(output).not.toContain("Location:");
+    expect(output).not.toMatch(/· House \d+/);
+  });
+
   it("emits stable JSON key order, fixture provenance, precision, and stale state", () => {
     const output = formatJson(currentSky, {
       referenceInstant: "2026-07-11T01:00:00.000Z",
