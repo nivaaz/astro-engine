@@ -65,9 +65,9 @@
 
 ## Public V1 refinements — 29 July 2026
 
-- State: Implementation complete locally on `codex/public-v1-refinements`; committed as `7f68e65`.
+- State: Implementation complete locally on `codex/public-v1-refinements`; base bundle committed as `7f68e65`, with formatter follow-up `40d1bfa`.
 - Delivered: presentation-only event filtering/grouping with two-date home preview and full `/events`; dedicated `/saturn-return` with supported-city/date inputs, optional local-noon approximation, bounded `asOf -2/+32` search, readable windows, exact passes, and per-pass copy; one reusable `Copy chart for AI` action through the existing no-store formatter transport; nearest-arcminute carry/wrap formatting; route metadata, structured data, sitemap, robots, and `llms.txt`.
 - Privacy/boundaries: canonical engine/provider/schema results remain unchanged; event/pass charts calculate only after explicit copy; birth input remains client-memory-only; no new public computation API or MCP route was added; public package exports remain deliberate and provider-neutral.
-- Evidence: `npm run verify` passed; 97 unit/contract tests (94 passed, 3 existing skips); 18 Playwright tests passed across desktop and mobile projects, including explicit 390px coverage; `npm run audit:dependencies`, `npm run performance:web`, four canonical package dry-run inspections, and `git diff --check` passed.
+- Evidence: `npm run verify` passed; 98 unit/contract tests (95 passed, 3 existing skips); the focused formatter suite passed (12/12); 18 Playwright tests passed across desktop and mobile projects, including explicit 390px coverage; `npm run audit:dependencies`, `npm run performance:web`, four canonical package dry-run inspections, and `git diff --check` passed.
 - Provider blocker: `npm run validate:swiss` was attempted and failed closed with `ENOENT` because restricted `apps/web/.private/ephemeris/sepl_18.se1` is not present in this isolated checkout. No Swiss data or fallback was added; provider-enabled scientific validation remains an environment/release gate.
 - Residual risk: hosted CI/security evidence, provider-enabled preview latency/Swiss validation, production promotion, package publication, push, PR creation, and any public Swiss asset distribution remain external owner-gated actions.

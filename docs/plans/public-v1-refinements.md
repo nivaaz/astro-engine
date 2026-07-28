@@ -1,6 +1,6 @@
 # Public V1 refinements
 
-- Status: Locally complete — commit `7f68e65`; provider/release gates remain external
+- Status: Locally complete — base commit `7f68e65`, formatter follow-up `40d1bfa`; provider/release gates remain external
 - Task class: T2; high risk for formatter, privacy, and route contracts
 - Source: [canonical Notion execution plan](https://app.notion.com/p/3ab4ba857af7814195dcfd3e1fa35f62) and linked delivery tickets
 - Current decision: preserve canonical engine/provider/schema results; add validated presentation projections, semantic routes, and one reusable AI-copy action
