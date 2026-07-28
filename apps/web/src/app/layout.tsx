@@ -21,12 +21,26 @@ export const viewport: Viewport = {
   themeColor: "#11110f",
 };
 
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "Astro Engine",
+  description:
+    "Deterministic tropical coordinates, Whole Sign structure, bounded events, and session-only Saturn-return timing.",
+  applicationCategory: "EducationalApplication",
+  operatingSystem: "Web",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en">
       <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
         <PwaRegistration />
         {children}
       </body>

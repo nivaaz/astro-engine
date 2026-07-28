@@ -6,6 +6,8 @@ import {
 import { UtcInstantSchema } from "@sukara/astro-schema";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { resolveEphemerisProvider } from "../../../server/provider-resolver";
+import { createChartCopyHandler } from "../../../server/chart-copy-route";
 
 const RequestSchema = z
   .object({
@@ -19,8 +21,18 @@ const headers = {
   "X-Content-Type-Options": "nosniff",
 } as const;
 
+const chartCopyPost = createChartCopyHandler(resolveEphemerisProvider);
+
 export async function POST(request: Request) {
   try {
+    const preview = await request.clone().json();
+    if (
+      typeof preview === "object" &&
+      preview !== null &&
+      "context" in preview
+    ) {
+      return chartCopyPost(request);
+    }
     const input = RequestSchema.safeParse(await request.json());
     if (!input.success)
       return NextResponse.json(

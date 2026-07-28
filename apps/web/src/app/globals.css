@@ -344,6 +344,98 @@ input:hover {
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
+.route-hero {
+  max-width: 1280px;
+  margin: auto;
+  padding: 5rem 0 4rem;
+  border-bottom: 1px solid var(--line);
+}
+.route-hero h1 {
+  margin: 1rem 0 1.5rem;
+  font-size: clamp(3.6rem, 8vw, 7.5rem);
+  line-height: 0.88;
+}
+.route-section {
+  min-height: 420px;
+}
+.timezone-field {
+  min-width: 16rem;
+}
+.copy-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.copy-action > span {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+.event-date-group {
+  margin-bottom: 3rem;
+}
+.event-date-group > h3 {
+  margin: 0 0 1.2rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--gold);
+  color: var(--gold);
+  font:
+    400 1.5rem Georgia,
+    serif;
+}
+.timeline article h4 {
+  margin: 0 0 0.8rem;
+  font:
+    400 1.55rem Georgia,
+    serif;
+}
+.timeline article .copy-action .button {
+  padding: 0.55rem 0.75rem;
+  font-size: 0.58rem;
+}
+.return-windows {
+  display: grid;
+  gap: 1.5rem;
+}
+.return-window {
+  border: 1px solid var(--line);
+  padding: 1.5rem;
+}
+.return-window h3 {
+  margin: 0.8rem 0 1.5rem;
+  font:
+    400 1.5rem Georgia,
+    serif;
+}
+.pass-list {
+  border-top: 1px solid var(--line);
+}
+.pass-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.pass-row > div:first-child {
+  display: grid;
+  gap: 0.25rem;
+}
+.pass-row span,
+.pass-row small,
+.optional {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+.precision-notice {
+  border-left: 2px solid var(--gold);
+  padding: 0.8rem 1rem;
+  color: var(--paper);
+  background: #262219;
+}
+.error-note {
+  color: var(--red);
+}
 .copy-group {
   display: flex;
   align-items: center;
@@ -645,6 +737,10 @@ footer > small {
     margin-left: 1.2rem;
     margin-right: 1.2rem;
   }
+  .route-hero {
+    margin-left: 1.2rem;
+    margin-right: 1.2rem;
+  }
   .location-bar {
     grid-template-columns: 1fr;
     gap: 1rem;
@@ -704,6 +800,13 @@ footer > small {
     flex-direction: column;
     gap: 1.5rem;
   }
+  .route-hero {
+    padding-top: 4rem;
+  }
+  .timezone-field {
+    min-width: 0;
+    width: 100%;
+  }
   .copy-group {
     width: 100%;
   }
@@ -729,6 +832,13 @@ footer > small {
   }
   .timeline article h3 {
     font-size: 1.35rem;
+  }
+  .timeline article h4 {
+    font-size: 1.15rem;
+  }
+  .pass-row {
+    align-items: start;
+    flex-direction: column;
   }
   .gate-list {
     grid-template-columns: 1fr 1fr;

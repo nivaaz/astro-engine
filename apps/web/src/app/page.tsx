@@ -5,16 +5,21 @@ import type {
   CurrentSky,
   EventSearchResult,
   HumanDesignTransitResult,
-  MajorEvent,
-  SaturnReturnResult,
   UtcInstant,
   WholeSignChart,
 } from "@sukara/astro-schema";
+import { formatArcminutes } from "@sukara/astro-formatters";
+import { CopyChartButton } from "../components/copy-chart-button";
 import {
   parseSkyTransportResponse,
   type SkyTransportResponse,
 } from "../lib/sky-transport";
 import { cityLabel, findMajorCity, MAJOR_CITIES } from "../lib/major-cities";
+import {
+  eventLabel,
+  formatEventDate,
+  groupEventsByLocalDate,
+} from "../lib/events-presentation";
 
 type DataMode = "loading" | "fixture" | "provider" | "unavailable" | "error";
 
@@ -67,10 +72,6 @@ function validLocalContext(
   }
 }
 
-function formatDegree(value: number): string {
-  return `${Math.floor(value)}°${String(Math.round((value % 1) * 60)).padStart(2, "0")}′`;
-}
-
 function formatTime(value: string, timezone?: string): string {
   try {
     return new Intl.DateTimeFormat("en-AU", {
@@ -87,42 +88,18 @@ function formatTime(value: string, timezone?: string): string {
   }
 }
 
-function localCivilToUtc(
-  date: string,
-  time: string,
-  timezone: string,
-): UtcInstant | null {
-  const [year, month, day] = date.split("-").map(Number);
-  const [hour, minute] = time.split(":").map(Number);
-  if ([year, month, day, hour, minute].some((part) => !Number.isFinite(part)))
-    return null;
-  let guess = Date.UTC(year!, month! - 1, day!, hour!, minute!);
-  for (let attempt = 0; attempt < 2; attempt += 1) {
-    const parts = Object.fromEntries(
-      new Intl.DateTimeFormat("en-CA", {
-        timeZone: timezone,
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hourCycle: "h23",
-      })
-        .formatToParts(new Date(guess))
-        .map(({ type, value }) => [type, value]),
-    );
-    const represented = Date.UTC(
-      Number(parts["year"]),
-      Number(parts["month"]) - 1,
-      Number(parts["day"]),
-      Number(parts["hour"]),
-      Number(parts["minute"]),
-      Number(parts["second"]),
-    );
-    guess -= represented - Date.UTC(year!, month! - 1, day!, hour!, minute!);
+function formatClock(value: string, timezone: string): string {
+  try {
+    return new Intl.DateTimeFormat("en-AU", {
+      timeStyle: "short",
+      timeZone: timezone,
+    }).format(new Date(value));
+  } catch {
+    return new Intl.DateTimeFormat("en-AU", {
+      timeStyle: "short",
+      timeZone: "UTC",
+    }).format(new Date(value));
   }
-  return new Date(guess).toISOString() as UtcInstant;
 }
 
 async function postOperation<T>(input: unknown): Promise<T> {
@@ -149,16 +126,6 @@ function providerEnvelopeValue<T>(body: unknown, responseOk = true): T {
   return body.value as T;
 }
 
-function eventLabel(event: MajorEvent): string {
-  if (event.kind === "ingress")
-    return `${title(event.body)} enters ${title(event.sign)}`;
-  if (event.kind === "station")
-    return `${title(event.body)} stations ${event.direction}`;
-  if (event.kind === "aspect")
-    return `${title(event.bodyA)} ${event.aspect} ${title(event.bodyB)}`;
-  return `${title(event.phase)} Moon`;
-}
-
 export default function HomePage() {
   const [mode, setMode] = useState<DataMode>("loading");
   const [payload, setPayload] = useState<SkyPayload | null>(null);
@@ -175,20 +142,7 @@ export default function HomePage() {
   );
   const [location, setLocation] = useState(EMPTY_LOCATION);
   const [locationCity, setLocationCity] = useState("");
-  const [birth, setBirth] = useState({
-    date: "",
-    time: "",
-    latitude: "",
-    longitude: "",
-    timezone: EMPTY_LOCATION.timezone,
-  });
-  const [birthCity, setBirthCity] = useState("");
-  const [copyState, setCopyState] = useState("Copy");
-  const [personalOpen, setPersonalOpen] = useState(false);
   const [wholeSign, setWholeSign] = useState<WholeSignChart | null>(null);
-  const [saturnReturn, setSaturnReturn] = useState<SaturnReturnResult | null>(
-    null,
-  );
   const [calculationMessage, setCalculationMessage] = useState("");
 
   function chooseLocationCity(value: string) {
@@ -200,22 +154,6 @@ export default function HomePage() {
       return;
     }
     setLocation({
-      latitude: String(city.latitude),
-      longitude: String(city.longitude),
-      timezone: city.timezone,
-    });
-  }
-
-  function chooseBirthCity(value: string) {
-    setBirthCity(value);
-    const city = findMajorCity(value);
-    if (city === undefined) {
-      if (value.trim() !== "")
-        setBirth({ ...birth, latitude: "", longitude: "", timezone: "" });
-      return;
-    }
-    setBirth({
-      ...birth,
       latitude: String(city.latitude),
       longitude: String(city.longitude),
       timezone: city.timezone,
@@ -277,12 +215,6 @@ export default function HomePage() {
     location.latitude !== "" &&
     location.longitude !== "" &&
     validLocalContext(location);
-  const birthValid =
-    birth.date !== "" &&
-    birth.time !== "" &&
-    birth.latitude !== "" &&
-    birth.longitude !== "" &&
-    validLocalContext(birth);
   const status = !online
     ? "Offline"
     : stale
@@ -294,41 +226,6 @@ export default function HomePage() {
           : mode === "loading"
             ? "Loading"
             : "Unavailable";
-
-  async function copy(format: "plain" | "markdown" | "json") {
-    if (!payload) return;
-    try {
-      const response = await fetch("/api/format", {
-        method: "POST",
-        cache: "no-store",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          format,
-          value: payload.currentSky,
-          referenceInstant:
-            referenceInstant ?? payload.currentSky.metadata.calculatedAt,
-        }),
-      });
-      const body: unknown = await response.json();
-      if (
-        !response.ok ||
-        typeof body !== "object" ||
-        body === null ||
-        !("ok" in body) ||
-        body.ok !== true ||
-        !("output" in body) ||
-        typeof body.output !== "string"
-      )
-        throw new Error("Format failed");
-      await navigator.clipboard.writeText(body.output);
-      setCopyState(
-        `${format === "json" ? "JSON" : format === "markdown" ? "Markdown" : "Plain text"} copied`,
-      );
-    } catch {
-      setCopyState("Copy failed");
-    }
-    window.setTimeout(() => setCopyState("Copy"), 1800);
-  }
 
   function useMyLocation() {
     setMessage("Requesting location permission…");
@@ -372,40 +269,6 @@ export default function HomePage() {
     }
   }
 
-  async function calculateReturn() {
-    if (!birthValid) return;
-    const birthInstant = localCivilToUtc(
-      birth.date,
-      birth.time,
-      birth.timezone,
-    );
-    if (birthInstant === null) {
-      setCalculationMessage("Birth time could not be resolved.");
-      return;
-    }
-    const asOf = new Date();
-    const start = new Date(asOf);
-    start.setUTCFullYear(start.getUTCFullYear() - 4);
-    const end = new Date(asOf);
-    end.setUTCFullYear(end.getUTCFullYear() + 4);
-    setCalculationMessage("Calculating bounded Saturn-return windows…");
-    try {
-      const value = await postOperation<SaturnReturnResult>({
-        operation: "saturn-return",
-        birthInstant,
-        asOf: asOf.toISOString(),
-        searchWindow: { start: start.toISOString(), end: end.toISOString() },
-        orb: 2,
-      });
-      setSaturnReturn(value);
-      setCalculationMessage("Saturn-return fixture calculation complete.");
-    } catch {
-      setCalculationMessage(
-        "Saturn return is unavailable without a configured provider.",
-      );
-    }
-  }
-
   return (
     <main>
       <header className="site-header">
@@ -417,8 +280,8 @@ export default function HomePage() {
         </a>
         <nav aria-label="Primary navigation">
           <a href="#sky">Current sky</a>
-          <a href="#events">Events</a>
-          <a href="#saturn">Saturn return</a>
+          <a href="/events">Events</a>
+          <a href="/saturn-return">Saturn return</a>
           <a href="#human-design">Human Design</a>
         </nav>
         <a
@@ -455,7 +318,7 @@ export default function HomePage() {
             </strong>
             <small>
               {payload
-                ? `${payload.currentSky.moonPhase.phaseAngle.toFixed(2)}° elongation`
+                ? `${formatArcminutes(payload.currentSky.moonPhase.phaseAngle)} elongation`
                 : "—"}
             </small>
           </div>
@@ -566,9 +429,9 @@ export default function HomePage() {
         </p>
         {wholeSign && (
           <p className="field-note valid" role="status">
-            Ascendant {formatDegree(wholeSign.ascendant)} · first house{" "}
+            Ascendant {formatArcminutes(wholeSign.ascendant)} · first house{" "}
             {title(wholeSign.firstHouseSign)} · Midheaven{" "}
-            {formatDegree(wholeSign.midheaven)}
+            {formatArcminutes(wholeSign.midheaven)}
           </p>
         )}
         <datalist id="major-city-options">
@@ -587,20 +450,20 @@ export default function HomePage() {
             <p className="section-index">02 / Coordinates</p>
             <h2 id="sky-title">Current sky</h2>
           </div>
-          <div className="copy-group" aria-label="Copy current sky">
-            <span role="status" aria-live="polite">
-              {copyState}
-            </span>
-            <button onClick={() => copy("plain")} disabled={!payload}>
-              Text
-            </button>
-            <button onClick={() => copy("markdown")} disabled={!payload}>
-              MD
-            </button>
-            <button onClick={() => copy("json")} disabled={!payload}>
-              JSON
-            </button>
-          </div>
+          <CopyChartButton
+            disabled={!payload}
+            request={
+              payload
+                ? {
+                    context: "current-sky",
+                    chartType: "Current sky",
+                    date: payload.currentSky.metadata.calculatedAt,
+                    currentSky: payload.currentSky,
+                    ...(wholeSign ? { wholeSignChart: wholeSign } : {}),
+                  }
+                : null
+            }
+          />
         </div>
         {payload ? (
           <div className="position-grid">
@@ -613,7 +476,7 @@ export default function HomePage() {
                   <h3>{title(planet.body)}</h3>
                   <p>{title(planet.sign)}</p>
                 </div>
-                <strong>{formatDegree(planet.signDegree)}</strong>
+                <strong>{formatArcminutes(planet.signDegree)}</strong>
                 {planet.retrograde && <span className="retrograde">℞</span>}
               </article>
             ))}
@@ -633,7 +496,7 @@ export default function HomePage() {
                   {title(aspect.bodyA)} · {title(aspect.bodyB)}
                 </strong>
                 <span>{title(aspect.type)}</span>
-                <span>{aspect.orb.toFixed(2)}° orb</span>
+                <span>{formatArcminutes(aspect.orb)} orb</span>
                 <span>{aspect.phase}</span>
               </div>
             ))}
@@ -651,32 +514,46 @@ export default function HomePage() {
             <p className="section-index">03 / Bounded search</p>
             <h2 id="events-title">Upcoming major events</h2>
           </div>
-          <p className="section-note">Next 30 days · notable + major</p>
+          <a className="button secondary" href="/events">
+            See all events
+          </a>
         </div>
         {payload ? (
           <div className="timeline">
-            {payload.upcomingEvents.events.map((event, index) => (
-              <article key={event.id}>
-                <time dateTime={event.exactAt}>
-                  {
-                    formatTime(event.exactAt, location.timezone || "UTC").split(
-                      ",",
-                    )[0]
-                  }
-                </time>
-                <span className="timeline-line" aria-hidden="true">
-                  <i />
-                </span>
-                <div>
-                  <p>{event.kind}</p>
-                  <h3>{eventLabel(event)}</h3>
-                  <small>
-                    {formatTime(event.exactAt, location.timezone || "UTC")}
-                  </small>
-                </div>
-                <b>{String(index + 1).padStart(2, "0")}</b>
-              </article>
-            ))}
+            {groupEventsByLocalDate(
+              payload.upcomingEvents.events,
+              location.timezone || "UTC",
+            )
+              .slice(0, 2)
+              .map((group) => (
+                <section className="event-date-group" key={group.localDate}>
+                  <h3>{formatEventDate(group.localDate)}</h3>
+                  {group.events.map((event, index) => (
+                    <article key={event.id}>
+                      <time dateTime={event.exactAt}>
+                        {formatClock(event.exactAt, location.timezone || "UTC")}
+                      </time>
+                      <span className="timeline-line" aria-hidden="true">
+                        <i />
+                      </span>
+                      <div>
+                        <p>{event.kind}</p>
+                        <h4>{eventLabel(event)}</h4>
+                      </div>
+                      <b>{String(index + 1).padStart(2, "0")}</b>
+                    </article>
+                  ))}
+                </section>
+              ))}
+            {groupEventsByLocalDate(
+              payload.upcomingEvents.events,
+              location.timezone || "UTC",
+            ).length === 0 && (
+              <EmptyState
+                mode={mode}
+                message="No relevant events in this bounded window."
+              />
+            )}
           </div>
         ) : (
           <EmptyState mode={mode} />
@@ -688,119 +565,13 @@ export default function HomePage() {
           <p className="section-index">04 / Session calculation</p>
           <h2>Saturn return</h2>
           <p>
-            Find exact return windows and passes from a natal Saturn coordinate.
-            Inputs are held in React memory only and are never stored, logged,
-            cached, or added to the URL.
+            Find exact return windows and passes from your birth date and a
+            supported major city. Local birth time is optional and clearly
+            labelled when noon is used as the deterministic approximation.
           </p>
-          <button
-            className="button"
-            onClick={() => setPersonalOpen(!personalOpen)}
-            aria-expanded={personalOpen}
-          >
-            {personalOpen ? "Close inputs" : "Enter birth data"}
-          </button>
-          {personalOpen && (
-            <form
-              className="birth-form"
-              onSubmit={(e) => {
-                e.preventDefault();
-                void calculateReturn();
-              }}
-            >
-              <label className="wide">
-                Major city
-                <input
-                  list="major-city-options"
-                  value={birthCity}
-                  onChange={(e) => chooseBirthCity(e.target.value)}
-                  placeholder="Sydney, Australia"
-                  autoComplete="off"
-                />
-              </label>
-              <label>
-                Date
-                <input
-                  type="date"
-                  value={birth.date}
-                  onChange={(e) => setBirth({ ...birth, date: e.target.value })}
-                />
-              </label>
-              <label>
-                Local time
-                <input
-                  type="time"
-                  value={birth.time}
-                  onChange={(e) => setBirth({ ...birth, time: e.target.value })}
-                />
-              </label>
-              <label>
-                Latitude
-                <input
-                  inputMode="decimal"
-                  value={birth.latitude}
-                  onChange={(e) => {
-                    setBirthCity("");
-                    setBirth({ ...birth, latitude: e.target.value });
-                  }}
-                />
-              </label>
-              <label>
-                Longitude
-                <input
-                  inputMode="decimal"
-                  value={birth.longitude}
-                  onChange={(e) => {
-                    setBirthCity("");
-                    setBirth({ ...birth, longitude: e.target.value });
-                  }}
-                />
-              </label>
-              <label className="wide">
-                Timezone
-                <input
-                  value={birth.timezone}
-                  onChange={(e) => {
-                    setBirthCity("");
-                    setBirth({ ...birth, timezone: e.target.value });
-                  }}
-                />
-              </label>
-              <button
-                className="button wide"
-                type="submit"
-                disabled={
-                  !birthValid || (mode !== "fixture" && mode !== "provider")
-                }
-              >
-                Calculate Saturn return
-              </button>
-              <p className="wide privacy-note">
-                {mode === "fixture" || mode === "provider"
-                  ? `${mode === "fixture" ? "Fixture" : "Provider"} calculations send inputs once to the no-store server route. `
-                  : "The form does not transmit while the licensed provider is unavailable. "}
-                Inputs are never logged or persisted. Closing or refreshing the
-                tab clears the values.
-              </p>
-              {saturnReturn && (
-                <div className="wide privacy-note" role="status">
-                  <strong>{title(saturnReturn.status)}</strong> ·{" "}
-                  {saturnReturn.windows.length} bounded window
-                  {saturnReturn.windows.length === 1 ? "" : "s"} ·{" "}
-                  {saturnReturn.windows.reduce(
-                    (count, window) => count + window.passes.length,
-                    0,
-                  )}{" "}
-                  exact pass
-                  {saturnReturn.windows.reduce(
-                    (count, window) => count + window.passes.length,
-                    0,
-                  ) === 1
-                    ? ""
-                    : "es"}
-                </div>
-              )}
-            </form>
-          )}
+          <a className="button" href="/saturn-return">
+            Explore Saturn return
+          </a>
           {calculationMessage && (
             <p className="privacy-note" aria-live="polite">
               {calculationMessage}
@@ -861,17 +632,22 @@ export default function HomePage() {
   );
 }
 
-function EmptyState({ mode }: { mode: DataMode }) {
+function EmptyState({ mode, message }: { mode: DataMode; message?: string }) {
   return (
     <div className="empty-state">
       <span aria-hidden="true">{mode === "loading" ? "◌" : "×"}</span>
       <strong>
-        {mode === "loading" ? "Awaiting calculation" : "Provider unavailable"}
+        {message ??
+          (mode === "loading"
+            ? "Awaiting calculation"
+            : "Provider unavailable")}
       </strong>
       <p>
-        {mode === "loading"
-          ? "Establishing a typed server connection."
-          : "No astronomical values are substituted or estimated."}
+        {message
+          ? "No astronomical values are substituted or estimated."
+          : mode === "loading"
+            ? "Establishing a typed server connection."
+            : "No astronomical values are substituted or estimated."}
       </p>
     </div>
   );

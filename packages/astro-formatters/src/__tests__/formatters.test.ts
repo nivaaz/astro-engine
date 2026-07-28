@@ -5,7 +5,14 @@ import {
   SATURN_RETURN_ALGORITHM_VERSION,
   SCHEMA_VERSION,
 } from "@sukara/astro-schema";
-import { formatJson, formatMarkdown, formatPromptText } from "../index.js";
+import {
+  AI_CHART_PROMPT,
+  formatAiChartCopy,
+  formatArcminutes,
+  formatJson,
+  formatMarkdown,
+  formatPromptText,
+} from "../index.js";
 
 const metadata = {
   schemaVersion: SCHEMA_VERSION,
@@ -113,6 +120,51 @@ const humanDesign = {
 } as const;
 
 describe("canonical formatters", () => {
+  it.each([
+    [29.999, "30°00′"],
+    [359.999, "0°00′"],
+    [360, "0°00′"],
+    [-0.001, "0°00′"],
+    [12.5, "12°30′"],
+  ])("formats %s to nearest arcminute", (value, expected) => {
+    expect(formatArcminutes(value)).toBe(expected);
+  });
+
+  it("formats one concise AI chart payload from canonical objects", () => {
+    const output = formatAiChartCopy({
+      chartType: "Current sky",
+      date: currentSky.metadata.calculatedAt,
+      currentSky,
+      wholeSignChart: {
+        metadata: { ...metadata, algorithmVersion: "whole-sign-v1" },
+        location: {
+          latitude: -33.8688,
+          longitude: 151.2093,
+          timezone: "Australia/Sydney",
+        },
+        ascendant: 0,
+        midheaven: 270,
+        firstHouseSign: "aries",
+        cusps: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330],
+        placements: [
+          { body: "sun", house: 1 },
+          { body: "moon", house: 2 },
+        ],
+      },
+    });
+    expect(output).toContain("# Current sky");
+    expect(output).toContain("Date: 2026-07-11T00:00:00.000Z");
+    expect(output).toContain("Zodiac: Tropical");
+    expect(output).toContain("House system: Whole Sign");
+    expect(output).toContain("Location: latitude -33.8688");
+    expect(output).toContain("Data from ASTRO ENGINE by sukara.tech");
+    expect(output).toContain("Sun in Cancer at 19°07′");
+    expect(output).toContain("Sun in Cancer at 19°07′ · House 1");
+    expect(output).toContain("Sun–Moon: Sextile · orb 0°08′ · applying");
+    expect(output).toContain(AI_CHART_PROMPT);
+    expect(output).not.toContain("109.123456789");
+  });
+
   it("emits stable JSON key order, fixture provenance, precision, and stale state", () => {
     const output = formatJson(currentSky, {
       referenceInstant: "2026-07-11T01:00:00.000Z",

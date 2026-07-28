@@ -1,0 +1,17 @@
+# Astro Engine
+
+Astro Engine provides deterministic tropical zodiac coordinates, Whole Sign structure, bounded major events, Saturn-return windows and passes, and Human Design transit gates/lines. It provides coordinates, context, and structure—not interpretations.
+
+## Stable routes
+
+- `/` — current sky, local Whole Sign context, a two-date event preview, and the route entry points.
+- `/events` — the canonical bounded 30-day event result grouped by browser/local timezone. Moon aspects and quarter lunations are omitted from this presentation; new/full lunations remain.
+- `/saturn-return` — session-only birth date + supported major city flow with optional local time, bounded windows, exact passes, and explicit chart-copy actions.
+
+## Data and privacy
+
+All astronomical values come from validated canonical server results. Birth inputs remain in client memory, are not placed in URLs or storage, and calculation responses are `no-store`. Fixture mode is explicitly labelled; an unavailable licensed provider fails closed.
+
+## Deferred
+
+There is no public computation API or MCP, account/saved-birth flow, calendar subscription, interpretation service, sidereal/Vedic mode, or public CLI in Public V1. Eclipse computation is deferred until a canonical eclipse event exists.

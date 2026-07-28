@@ -15,6 +15,7 @@ export default defineConfig({
       "tests/**/*.test.ts",
       "packages/**/__tests__/**/*.test.ts",
       "apps/web/src/server/**/__tests__/**/*.test.ts",
+      "apps/web/src/lib/**/__tests__/**/*.test.ts",
     ],
     exclude: ["**/node_modules/**", "**/.next/**", "**/dist/**"],
     coverage: {
