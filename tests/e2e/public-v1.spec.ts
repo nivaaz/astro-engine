@@ -113,12 +113,29 @@ test("invalid local context is not labelled ready and clipboard failures are ann
   await page.getByLabel("Longitude").first().fill("151.2");
   await page.getByLabel("Timezone").first().fill("Not/AZone");
   await expect(
-    page.getByText("Enter coordinates or use browser geolocation"),
+    page.getByText(
+      "Choose a major city, enter coordinates, or use browser geolocation",
+    ),
   ).toBeVisible();
   await page.getByRole("button", { name: "Text" }).click();
   await expect(page.locator(".copy-group").getByRole("status")).toContainText(
     "Copy failed",
   );
+});
+
+test("major city lookup fills canonical local context without a network request", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("Major city").first().fill("Sydney, Australia");
+  await expect(page.getByLabel("Latitude").first()).toHaveValue("-33.92001");
+  await expect(page.getByLabel("Longitude").first()).toHaveValue("151.18518");
+  await expect(page.getByLabel("Timezone").first()).toHaveValue(
+    "Australia/Sydney",
+  );
+  await expect(
+    page.getByText(/Local context ready · Sydney, Australia/),
+  ).toBeVisible();
 });
 
 test("fixture provider executes Whole Sign and Saturn-return session flows", async ({

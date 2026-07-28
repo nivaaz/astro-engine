@@ -14,6 +14,7 @@ Open, accurate, deterministic symbolic infrastructure. Outputs are coordinates, 
 - Saturn-return windows, passes, orb, and upcoming/active/complete status
 - Human Design transit gates and lines only
 - Browser geolocation or manual latitude/longitude/timezone
+- Offline major-city lookup resolving to latitude/longitude/timezone without a third-party geocoding request
 - Canonical JSON, Markdown, and prompt-ready plain text
 - No-account installable PWA with explicit stale/offline state
 - Session-only birth input

@@ -50,6 +50,12 @@
 - Local disposition: Foundation + Public V1 is technically ready with a protected private-provider preview path; public packages remain provider-neutral and contain no Swiss material
 - External release blocks: private-provider latency qualification, hosted CI/CodeQL/Gitleaks results, production promotion, and public package publication. Owner confirms signed Swiss terms; the contract remains private and is not committed here.
 
+## Location lookup update — 28 July 2026
+
+- Added a bundled top-500 major-city lookup derived from `city-timezones` 1.3.4. City selection resolves locally to canonical coordinates and IANA timezone; browser geolocation and manual coordinates remain available for places outside the dataset.
+- Google Places was not added: V1 does not need exact-address geocoding, and a live Places integration would add API-key handling, billing, third-party availability, and Google Maps Platform data-use constraints.
+- Targeted evidence: city-selection Playwright coverage, privacy documentation, bundle/performance gate, full verification, and no network request for lookup resolution.
+
 ## Deployment configuration — 12 July 2026
 
 - Vercel project `astro-engine` (`prj_1coCbTdVD6VgJ7CzvzumjSGpYeyx`) now uses Root Directory `apps/web` with the Next.js preset.

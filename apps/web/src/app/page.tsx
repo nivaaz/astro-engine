@@ -14,6 +14,7 @@ import {
   parseSkyTransportResponse,
   type SkyTransportResponse,
 } from "../lib/sky-transport";
+import { cityLabel, findMajorCity, MAJOR_CITIES } from "../lib/major-cities";
 
 type DataMode = "loading" | "fixture" | "provider" | "unavailable" | "error";
 
@@ -173,6 +174,7 @@ export default function HomePage() {
     null,
   );
   const [location, setLocation] = useState(EMPTY_LOCATION);
+  const [locationCity, setLocationCity] = useState("");
   const [birth, setBirth] = useState({
     date: "",
     time: "",
@@ -180,6 +182,7 @@ export default function HomePage() {
     longitude: "",
     timezone: EMPTY_LOCATION.timezone,
   });
+  const [birthCity, setBirthCity] = useState("");
   const [copyState, setCopyState] = useState("Copy");
   const [personalOpen, setPersonalOpen] = useState(false);
   const [wholeSign, setWholeSign] = useState<WholeSignChart | null>(null);
@@ -187,6 +190,37 @@ export default function HomePage() {
     null,
   );
   const [calculationMessage, setCalculationMessage] = useState("");
+
+  function chooseLocationCity(value: string) {
+    setLocationCity(value);
+    const city = findMajorCity(value);
+    if (city === undefined) {
+      if (value.trim() !== "")
+        setLocation({ ...location, latitude: "", longitude: "", timezone: "" });
+      return;
+    }
+    setLocation({
+      latitude: String(city.latitude),
+      longitude: String(city.longitude),
+      timezone: city.timezone,
+    });
+  }
+
+  function chooseBirthCity(value: string) {
+    setBirthCity(value);
+    const city = findMajorCity(value);
+    if (city === undefined) {
+      if (value.trim() !== "")
+        setBirth({ ...birth, latitude: "", longitude: "", timezone: "" });
+      return;
+    }
+    setBirth({
+      ...birth,
+      latitude: String(city.latitude),
+      longitude: String(city.longitude),
+      timezone: city.timezone,
+    });
+  }
 
   useEffect(() => {
     void (async () => {
@@ -300,6 +334,7 @@ export default function HomePage() {
     setMessage("Requesting location permission…");
     navigator.geolocation.getCurrentPosition(
       ({ coords }) => {
+        setLocationCity("");
         setLocation({
           latitude: coords.latitude.toFixed(5),
           longitude: coords.longitude.toFixed(5),
@@ -461,14 +496,25 @@ export default function HomePage() {
           </p>
         </div>
         <div className="location-fields">
+          <label className="wide">
+            Major city
+            <input
+              list="major-city-options"
+              value={locationCity}
+              onChange={(e) => chooseLocationCity(e.target.value)}
+              placeholder="Sydney, Australia"
+              autoComplete="off"
+            />
+          </label>
           <label>
             Latitude
             <input
               inputMode="decimal"
               value={location.latitude}
-              onChange={(e) =>
-                setLocation({ ...location, latitude: e.target.value })
-              }
+              onChange={(e) => {
+                setLocationCity("");
+                setLocation({ ...location, latitude: e.target.value });
+              }}
               placeholder="−33.8688"
             />
           </label>
@@ -477,9 +523,10 @@ export default function HomePage() {
             <input
               inputMode="decimal"
               value={location.longitude}
-              onChange={(e) =>
-                setLocation({ ...location, longitude: e.target.value })
-              }
+              onChange={(e) => {
+                setLocationCity("");
+                setLocation({ ...location, longitude: e.target.value });
+              }}
               placeholder="151.2093"
             />
           </label>
@@ -487,9 +534,10 @@ export default function HomePage() {
             Timezone
             <input
               value={location.timezone}
-              onChange={(e) =>
-                setLocation({ ...location, timezone: e.target.value })
-              }
+              onChange={(e) => {
+                setLocationCity("");
+                setLocation({ ...location, timezone: e.target.value });
+              }}
               placeholder="Australia/Sydney"
             />
           </label>
@@ -513,8 +561,8 @@ export default function HomePage() {
         </div>
         <p className={`field-note ${locationValid ? "valid" : ""}`}>
           {locationValid
-            ? "Local context ready · held in this tab only"
-            : "Enter coordinates or use browser geolocation"}
+            ? `Local context ready${locationCity ? ` · ${locationCity}` : ""} · held in this tab only`
+            : "Choose a major city, enter coordinates, or use browser geolocation"}
         </p>
         {wholeSign && (
           <p className="field-note valid" role="status">
@@ -523,6 +571,14 @@ export default function HomePage() {
             {formatDegree(wholeSign.midheaven)}
           </p>
         )}
+        <datalist id="major-city-options">
+          {MAJOR_CITIES.map((city) => (
+            <option
+              key={`${city.name}-${city.country}`}
+              value={cityLabel(city)}
+            />
+          ))}
+        </datalist>
       </section>
 
       <section className="data-section" id="sky" aria-labelledby="sky-title">
@@ -651,6 +707,16 @@ export default function HomePage() {
                 void calculateReturn();
               }}
             >
+              <label className="wide">
+                Major city
+                <input
+                  list="major-city-options"
+                  value={birthCity}
+                  onChange={(e) => chooseBirthCity(e.target.value)}
+                  placeholder="Sydney, Australia"
+                  autoComplete="off"
+                />
+              </label>
               <label>
                 Date
                 <input
@@ -672,9 +738,10 @@ export default function HomePage() {
                 <input
                   inputMode="decimal"
                   value={birth.latitude}
-                  onChange={(e) =>
-                    setBirth({ ...birth, latitude: e.target.value })
-                  }
+                  onChange={(e) => {
+                    setBirthCity("");
+                    setBirth({ ...birth, latitude: e.target.value });
+                  }}
                 />
               </label>
               <label>
@@ -682,18 +749,20 @@ export default function HomePage() {
                 <input
                   inputMode="decimal"
                   value={birth.longitude}
-                  onChange={(e) =>
-                    setBirth({ ...birth, longitude: e.target.value })
-                  }
+                  onChange={(e) => {
+                    setBirthCity("");
+                    setBirth({ ...birth, longitude: e.target.value });
+                  }}
                 />
               </label>
               <label className="wide">
                 Timezone
                 <input
                   value={birth.timezone}
-                  onChange={(e) =>
-                    setBirth({ ...birth, timezone: e.target.value })
-                  }
+                  onChange={(e) => {
+                    setBirthCity("");
+                    setBirth({ ...birth, timezone: e.target.value });
+                  }}
                 />
               </label>
               <button
