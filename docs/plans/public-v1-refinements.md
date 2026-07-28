@@ -1,10 +1,10 @@
 # Public V1 refinements
 
-- Status: In progress — bounded implementation in isolated worktree
+- Status: Locally complete — commit `7f68e65`; provider/release gates remain external
 - Task class: T2; high risk for formatter, privacy, and route contracts
 - Source: [canonical Notion execution plan](https://app.notion.com/p/3ab4ba857af7814195dcfd3e1fa35f62) and linked delivery tickets
 - Current decision: preserve canonical engine/provider/schema results; add validated presentation projections, semantic routes, and one reusable AI-copy action
-- Next action: implement events, Saturn-return, chart-copy, and discoverability phases, then run the full local gates
+- Next action: owner review of the local evidence; no deployment, publication, push, or PR is authorized by this plan
 
 ## Scope
 

@@ -65,7 +65,7 @@
 
 ## Public V1 refinements — 29 July 2026
 
-- State: Implementation complete locally on `codex/public-v1-refinements`; commit pending final diff review.
+- State: Implementation complete locally on `codex/public-v1-refinements`; committed as `7f68e65`.
 - Delivered: presentation-only event filtering/grouping with two-date home preview and full `/events`; dedicated `/saturn-return` with supported-city/date inputs, optional local-noon approximation, bounded `asOf -2/+32` search, readable windows, exact passes, and per-pass copy; one reusable `Copy chart for AI` action through the existing no-store formatter transport; nearest-arcminute carry/wrap formatting; route metadata, structured data, sitemap, robots, and `llms.txt`.
 - Privacy/boundaries: canonical engine/provider/schema results remain unchanged; event/pass charts calculate only after explicit copy; birth input remains client-memory-only; no new public computation API or MCP route was added; public package exports remain deliberate and provider-neutral.
 - Evidence: `npm run verify` passed; 97 unit/contract tests (94 passed, 3 existing skips); 18 Playwright tests passed across desktop and mobile projects, including explicit 390px coverage; `npm run audit:dependencies`, `npm run performance:web`, four canonical package dry-run inspections, and `git diff --check` passed.
