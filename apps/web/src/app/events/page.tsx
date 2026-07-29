@@ -7,6 +7,7 @@ import type {
   UtcInstant,
 } from "@sukara/astro-schema";
 import { CopyChartButton } from "../../components/copy-chart-button";
+import { SiteHeader } from "../../components/site-header";
 import {
   eventLabel,
   formatEventDate,
@@ -116,36 +117,22 @@ export default function EventsPage() {
 
   return (
     <main>
-      <header className="site-header">
-        <a className="brand" href="/" aria-label="Astro Engine home">
-          <span className="brand-mark" aria-hidden="true">
-            ✣
-          </span>
-          <span>Astro Engine</span>
-        </a>
-        <nav aria-label="Primary navigation">
-          <a href="/">Current sky</a>
-          <a href="/events" aria-current="page">
-            Events
-          </a>
-          <a href="/saturn-return">Saturn return</a>
-        </nav>
-        <a
-          className="github-link"
-          href="https://github.com/nivaaz/astro-engine"
-        >
-          GitHub <span aria-hidden="true">↗</span>
-        </a>
-      </header>
+      <SiteHeader activeRoute="events" />
       <section className="route-hero">
-        <p className="eyebrow">Public V1 · bounded search</p>
+        <p className="eyebrow">Bounded major events</p>
         <h1>Upcoming events</h1>
         <p className="lede">
-          The canonical 30-day result, grouped by calendar date in your browser
-          timezone. Moon aspects and quarter lunations are excluded from this
-          presentation; new and full lunations remain. Eclipse computation is
-          deferred until a canonical eclipse event exists.
+          See the next 30 days of major events, grouped by calendar date in your
+          browser timezone.
         </p>
+        <details className="methodology-disclosure">
+          <summary>About this feed</summary>
+          <p>
+            Moon aspects and quarter lunations are excluded from this
+            presentation; new and full lunations remain. Eclipse computation is
+            deferred until a canonical eclipse event exists.
+          </p>
+        </details>
       </section>
       <section
         className={`notice ${mode === "fixture" ? "notice-fixture" : ""}`}
@@ -201,6 +188,7 @@ export default function EventsPage() {
                       <p>{event.kind}</p>
                       <h4>{eventLabel(event)}</h4>
                       <CopyChartButton
+                        variant="quiet"
                         request={{
                           context:
                             event.kind === "lunation" ? "lunation" : "event",

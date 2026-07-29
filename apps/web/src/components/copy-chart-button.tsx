@@ -32,7 +32,12 @@ type CopyChartRequest =
 export function CopyChartButton({
   request,
   disabled = false,
-}: Readonly<{ request: CopyChartRequest | null; disabled?: boolean }>) {
+  variant = "primary",
+}: Readonly<{
+  request: CopyChartRequest | null;
+  disabled?: boolean;
+  variant?: "primary" | "quiet";
+}>) {
   const [status, setStatus] = useState("");
 
   async function copyChart() {
@@ -65,7 +70,7 @@ export function CopyChartButton({
   }
 
   return (
-    <span className="copy-action">
+    <span className={`copy-action copy-action-${variant}`}>
       <button
         className="button"
         type="button"

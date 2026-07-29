@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   GeoLocationSchema,
   type SaturnReturnResult,
   type UtcInstant,
 } from "@sukara/astro-schema";
 import { CopyChartButton } from "../../components/copy-chart-button";
+import { SiteHeader } from "../../components/site-header";
 import {
   cityLabel,
   findMajorCity,
@@ -14,6 +15,10 @@ import {
   type MajorCity,
 } from "../../lib/major-cities";
 import { localCivilToUtc } from "../../lib/local-time";
+import {
+  validateSaturnReturnForm,
+  type SaturnFormErrors,
+} from "../../lib/saturn-return-validation";
 
 type Status = "idle" | "calculating" | "ready" | "error" | "unavailable";
 
@@ -61,20 +66,37 @@ export default function SaturnReturnPage() {
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState("");
   const [usedNoon, setUsedNoon] = useState(false);
+  const [formErrors, setFormErrors] = useState<SaturnFormErrors>({
+    date: "",
+    city: "",
+  });
+  const dateRef = useRef<HTMLInputElement>(null);
+  const cityRef = useRef<HTMLInputElement>(null);
   const noonApproximation = time === "";
 
   function selectCity(value: string) {
     setCityText(value);
     setCity(findMajorCity(value) ?? null);
+    setFormErrors((current) => ({ ...current, city: "" }));
   }
 
   async function calculate() {
     const selectedCity = city ?? findMajorCity(cityText);
-    if (date === "" || selectedCity === undefined || selectedCity === null) {
+    const nextErrors = validateSaturnReturnForm({
+      date,
+      citySelected: selectedCity !== undefined && selectedCity !== null,
+    });
+    if (nextErrors.date !== "" || nextErrors.city !== "") {
+      setFormErrors(nextErrors);
       setStatus("error");
-      setMessage("Enter a birth date and choose a supported major city.");
+      setMessage("");
+      window.requestAnimationFrame(() => {
+        if (nextErrors.date !== "") dateRef.current?.focus();
+        else cityRef.current?.focus();
+      });
       return;
     }
+    if (selectedCity === undefined || selectedCity === null) return;
     const birthInstant = localCivilToUtc(
       date,
       time || "12:00",
@@ -82,9 +104,14 @@ export default function SaturnReturnPage() {
     );
     if (birthInstant === null) {
       setStatus("error");
-      setMessage("The local birth date and time could not be resolved.");
+      setFormErrors({
+        date: "The local birth date and time could not be resolved.",
+        city: "",
+      });
+      dateRef.current?.focus();
       return;
     }
+    setFormErrors({ date: "", city: "" });
     const asOf = new Date();
     const start = new Date(asOf);
     start.setUTCFullYear(start.getUTCFullYear() - 2);
@@ -125,34 +152,13 @@ export default function SaturnReturnPage() {
 
   return (
     <main>
-      <header className="site-header">
-        <a className="brand" href="/" aria-label="Astro Engine home">
-          <span className="brand-mark" aria-hidden="true">
-            ✣
-          </span>
-          <span>Astro Engine</span>
-        </a>
-        <nav aria-label="Primary navigation">
-          <a href="/">Current sky</a>
-          <a href="/events">Events</a>
-          <a href="/saturn-return" aria-current="page">
-            Saturn return
-          </a>
-        </nav>
-        <a
-          className="github-link"
-          href="https://github.com/nivaaz/astro-engine"
-        >
-          GitHub <span aria-hidden="true">↗</span>
-        </a>
-      </header>
+      <SiteHeader activeRoute="saturn" />
       <section className="route-hero">
-        <p className="eyebrow">Public V1 · session-only calculation</p>
+        <p className="eyebrow">Session-only calculation</p>
         <h1>Saturn return</h1>
         <p className="lede">
-          A bounded factual search for the windows when transiting Saturn
-          returns to your natal Saturn longitude. This route reports dates,
-          local times, and exact pass direction; it does not interpret them.
+          Find the bounded dates when transiting Saturn returns to your natal
+          Saturn longitude. Dates only; no interpretation.
         </p>
       </section>
       <section
@@ -173,6 +179,7 @@ export default function SaturnReturnPage() {
         </p>
         <form
           className="birth-form saturn-form"
+          noValidate
           onSubmit={(event) => {
             event.preventDefault();
             void calculate();
@@ -181,11 +188,22 @@ export default function SaturnReturnPage() {
           <label>
             Date
             <input
+              ref={dateRef}
               type="date"
               value={date}
-              onChange={(event) => setDate(event.target.value)}
+              onChange={(event) => {
+                setDate(event.target.value);
+                setFormErrors((current) => ({ ...current, date: "" }));
+              }}
               required
+              aria-invalid={formErrors.date !== ""}
+              aria-describedby={formErrors.date ? "date-error" : undefined}
             />
+            {formErrors.date && (
+              <span id="date-error" className="form-error" role="alert">
+                {formErrors.date}
+              </span>
+            )}
           </label>
           <label>
             Local time <span className="optional">optional</span>
@@ -199,13 +217,21 @@ export default function SaturnReturnPage() {
           <label className="wide">
             Supported major city
             <input
+              ref={cityRef}
               list="saturn-city-options"
               value={cityText}
               onChange={(event) => selectCity(event.target.value)}
               placeholder="Sydney, Australia"
               autoComplete="off"
               required
+              aria-invalid={formErrors.city !== ""}
+              aria-describedby={formErrors.city ? "city-error" : undefined}
             />
+            {formErrors.city && (
+              <span id="city-error" className="form-error" role="alert">
+                {formErrors.city}
+              </span>
+            )}
           </label>
           <datalist id="saturn-city-options">
             {MAJOR_CITIES.map((item) => (
@@ -338,6 +364,7 @@ function SaturnResults({
                       <small>{title(pass.direction)}</small>
                     </div>
                     <CopyChartButton
+                      variant="quiet"
                       request={{
                         context: "saturn-return-pass",
                         chartType: `Saturn return pass ${pass.sequence}`,

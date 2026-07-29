@@ -10,6 +10,7 @@ import type {
 } from "@sukara/astro-schema";
 import { formatArcminutes } from "@sukara/astro-formatters";
 import { CopyChartButton } from "../components/copy-chart-button";
+import { SiteHeader } from "../components/site-header";
 import {
   parseSkyTransportResponse,
   type SkyTransportResponse,
@@ -271,30 +272,15 @@ export default function HomePage() {
 
   return (
     <main>
-      <header className="site-header">
-        <a className="brand" href="#top" aria-label="Astro Engine home">
-          <span className="brand-mark" aria-hidden="true">
-            ✣
-          </span>
-          <span>Astro Engine</span>
+      <SiteHeader activeRoute="sky" home>
+        <a className="home-only-nav" href="#human-design">
+          Human Design
         </a>
-        <nav aria-label="Primary navigation">
-          <a href="#sky">Current sky</a>
-          <a href="/events">Events</a>
-          <a href="/saturn-return">Saturn return</a>
-          <a href="#human-design">Human Design</a>
-        </nav>
-        <a
-          className="github-link"
-          href="https://github.com/nivaaz/astro-engine"
-        >
-          GitHub <span aria-hidden="true">↗</span>
-        </a>
-      </header>
+      </SiteHeader>
 
       <section className="hero" id="top">
         <div className="hero-copy">
-          <p className="eyebrow">Open symbolic infrastructure · Public V1</p>
+          <p className="eyebrow">Open symbolic infrastructure</p>
           <h1>
             The sky,
             <br />
@@ -349,105 +335,10 @@ export default function HomePage() {
         )}
       </section>
 
-      <section className="location-bar" aria-labelledby="location-title">
-        <div>
-          <p className="section-index">01 / Local context</p>
-          <h2 id="location-title">Your horizon</h2>
-          <p>
-            Coordinates affect local Whole Sign data, never the global event
-            itself.
-          </p>
-        </div>
-        <div className="location-fields">
-          <label className="wide">
-            Major city
-            <input
-              list="major-city-options"
-              value={locationCity}
-              onChange={(e) => chooseLocationCity(e.target.value)}
-              placeholder="Sydney, Australia"
-              autoComplete="off"
-            />
-          </label>
-          <label>
-            Latitude
-            <input
-              inputMode="decimal"
-              value={location.latitude}
-              onChange={(e) => {
-                setLocationCity("");
-                setLocation({ ...location, latitude: e.target.value });
-              }}
-              placeholder="−33.8688"
-            />
-          </label>
-          <label>
-            Longitude
-            <input
-              inputMode="decimal"
-              value={location.longitude}
-              onChange={(e) => {
-                setLocationCity("");
-                setLocation({ ...location, longitude: e.target.value });
-              }}
-              placeholder="151.2093"
-            />
-          </label>
-          <label>
-            Timezone
-            <input
-              value={location.timezone}
-              onChange={(e) => {
-                setLocationCity("");
-                setLocation({ ...location, timezone: e.target.value });
-              }}
-              placeholder="Australia/Sydney"
-            />
-          </label>
-          <button
-            className="button secondary"
-            type="button"
-            onClick={useMyLocation}
-          >
-            Use my location
-          </button>
-          <button
-            className="button secondary"
-            type="button"
-            onClick={calculateLocalStructure}
-            disabled={
-              !locationValid || (mode !== "fixture" && mode !== "provider")
-            }
-          >
-            Calculate Whole Sign
-          </button>
-        </div>
-        <p className={`field-note ${locationValid ? "valid" : ""}`}>
-          {locationValid
-            ? `Local context ready${locationCity ? ` · ${locationCity}` : ""} · held in this tab only`
-            : "Choose a major city, enter coordinates, or use browser geolocation"}
-        </p>
-        {wholeSign && (
-          <p className="field-note valid" role="status">
-            Ascendant {formatArcminutes(wholeSign.ascendant)} · first house{" "}
-            {title(wholeSign.firstHouseSign)} · Midheaven{" "}
-            {formatArcminutes(wholeSign.midheaven)}
-          </p>
-        )}
-        <datalist id="major-city-options">
-          {MAJOR_CITIES.map((city) => (
-            <option
-              key={`${city.name}-${city.country}`}
-              value={cityLabel(city)}
-            />
-          ))}
-        </datalist>
-      </section>
-
       <section className="data-section" id="sky" aria-labelledby="sky-title">
         <div className="section-heading">
           <div>
-            <p className="section-index">02 / Coordinates</p>
+            <p className="section-index">01 / Current sky</p>
             <h2 id="sky-title">Current sky</h2>
           </div>
           <CopyChartButton
@@ -502,6 +393,108 @@ export default function HomePage() {
             ))}
           </div>
         )}
+      </section>
+
+      <section className="location-bar" aria-labelledby="location-title">
+        <div>
+          <p className="section-index">02 / Local context</p>
+          <h2 id="location-title">Your horizon</h2>
+          <p>
+            Choose a city for local Whole Sign structure. Coordinates stay in
+            this tab and do not change the global event result.
+          </p>
+        </div>
+        <div className="location-fields">
+          <label className="wide">
+            Major city
+            <input
+              list="major-city-options"
+              value={locationCity}
+              onChange={(e) => chooseLocationCity(e.target.value)}
+              placeholder="Sydney, Australia"
+              autoComplete="off"
+            />
+          </label>
+          <div className="location-actions">
+            <button
+              className="button secondary"
+              type="button"
+              onClick={useMyLocation}
+            >
+              Use my location
+            </button>
+            <button
+              className="button"
+              type="button"
+              onClick={calculateLocalStructure}
+              disabled={
+                !locationValid || (mode !== "fixture" && mode !== "provider")
+              }
+            >
+              Calculate Whole Sign
+            </button>
+          </div>
+          <details className="location-details wide">
+            <summary>Advanced coordinates</summary>
+            <div className="advanced-location-fields">
+              <label>
+                Latitude
+                <input
+                  inputMode="decimal"
+                  value={location.latitude}
+                  onChange={(e) => {
+                    setLocationCity("");
+                    setLocation({ ...location, latitude: e.target.value });
+                  }}
+                  placeholder="−33.8688"
+                />
+              </label>
+              <label>
+                Longitude
+                <input
+                  inputMode="decimal"
+                  value={location.longitude}
+                  onChange={(e) => {
+                    setLocationCity("");
+                    setLocation({ ...location, longitude: e.target.value });
+                  }}
+                  placeholder="151.2093"
+                />
+              </label>
+              <label>
+                Timezone
+                <input
+                  value={location.timezone}
+                  onChange={(e) => {
+                    setLocationCity("");
+                    setLocation({ ...location, timezone: e.target.value });
+                  }}
+                  placeholder="Australia/Sydney"
+                />
+              </label>
+            </div>
+          </details>
+        </div>
+        <p className={`field-note ${locationValid ? "valid" : ""}`}>
+          {locationValid
+            ? `Local context ready${locationCity ? ` · ${locationCity}` : ""} · held in this tab only`
+            : "Choose a major city, enter coordinates, or use browser geolocation"}
+        </p>
+        {wholeSign && (
+          <p className="field-note valid" role="status">
+            Ascendant {formatArcminutes(wholeSign.ascendant)} · first house{" "}
+            {title(wholeSign.firstHouseSign)} · Midheaven{" "}
+            {formatArcminutes(wholeSign.midheaven)}
+          </p>
+        )}
+        <datalist id="major-city-options">
+          {MAJOR_CITIES.map((city) => (
+            <option
+              key={`${city.name}-${city.country}`}
+              value={cityLabel(city)}
+            />
+          ))}
+        </datalist>
       </section>
 
       <section
@@ -582,8 +575,8 @@ export default function HomePage() {
           <p className="section-index">05 / Tropical projection</p>
           <h2>Human Design transits</h2>
           <p className="card-copy">
-            Gate and line coordinates only. No bodygraph, type, authority, or
-            interpretation.
+            Sun, Earth, and Moon are shown as gate.line transit coordinates. No
+            bodygraph, type, authority, or interpretation.
           </p>
           {payload ? (
             <div className="gate-list">
