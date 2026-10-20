@@ -26,3 +26,7 @@ Both development bundlers reproduced a cached-shell hydration stall after the ru
 ## Release requirements
 
 Promote only after browser regressions, hosted CI/security checks and actual Linux/Swiss provider smoke pass. Verify the production offline flow separately from the development server. Session inputs remain memory-only; this release adds no accounts, saved charts, public packages or additional calculator contracts.
+
+## Hosted closure
+
+The final hosted install runs from repository root and includes the lock-pinned development build tools. Hosted Node 24.21.0 / npm 11.19.0 satisfy the declared ranges. Independent follow-up review cleared the explicit provider environment hash, upload exclusions, four-package browser-test prerequisite and Sydney timezone fixture assertion. All final CI checks and the actual provider/copy/offline gates passed before promotion. Production identity and remaining limits are recorded in the release report.
