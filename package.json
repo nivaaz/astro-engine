@@ -29,7 +29,8 @@
     "typecheck": "turbo run typecheck",
     "audit:dependencies": "npm audit --omit=dev --audit-level=high",
     "performance:web": "node scripts/check-web-bundle.mjs",
-    "verify": "npm run format:check && npm run typecheck && npm run lint && npm run test && npm run build"
+    "verify": "npm run format:check && npm run typecheck && npm run lint && npm run test && npm run build",
+    "pretest:e2e": "turbo run build --filter=@sukara/astro-web^..."
   },
   "devDependencies": {
     "@playwright/test": "1.61.1",
