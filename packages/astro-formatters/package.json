@@ -1,25 +1,49 @@
 {
-  "name": "@astro-engine/astro-formatters",
+  "name": "@sukara/astro-formatters",
   "version": "0.1.0",
   "private": true,
-  "description": "Format astrology data as JSON, Markdown, ICS, prompt-ready text",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "type": "module",
+  "license": "MIT",
+  "description": "Deterministic canonical formatters for Astro Engine outputs",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./json": {
+      "types": "./dist/json.d.ts",
+      "import": "./dist/json.js"
+    },
+    "./ai-chart-copy": {
+      "types": "./dist/ai-chart-copy.d.ts",
+      "import": "./dist/ai-chart-copy.js"
+    },
+    "./arcminutes": {
+      "types": "./dist/arcminutes.d.ts",
+      "import": "./dist/arcminutes.js"
+    },
+    "./markdown": {
+      "types": "./dist/markdown.d.ts",
+      "import": "./dist/markdown.js"
+    },
+    "./prompt-text": {
+      "types": "./dist/prompt-text.d.ts",
+      "import": "./dist/prompt-text.js"
+    }
+  },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
-    "test": "vitest run",
-    "lint": "tsc --noEmit",
-    "clean": "rm -rf dist .turbo"
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist .turbo",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@astro-engine/schema": "*"
+    "@sukara/astro-schema": "0.1.0"
   },
   "devDependencies": {
-    "typescript": "^5.5.0",
-    "vitest": "^2.0.0"
+    "typescript": "6.0.3"
   }
 }

@@ -1,0 +1,33 @@
+{
+  "name": "@sukara/human-design",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "Deterministic tropical Human Design transit gate and line projection",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./gate-wheel": {
+      "types": "./dist/gate-wheel.d.ts",
+      "import": "./dist/gate-wheel.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist .turbo",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@sukara/astro-schema": "0.1.0"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3"
+  }
+}

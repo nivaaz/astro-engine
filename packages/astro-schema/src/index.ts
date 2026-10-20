@@ -1,73 +1,123 @@
-/**
- * @astro-engine/schema
- *
- * Shared TypeScript types, validators, and constants.
- * ZERO runtime dependencies — pure types and enums.
- *
- * Derived from Mirror Mindset's proven astro-core types.
- * Source: nivaaz/astroai/src/app/lib/astro-core/types.ts
- */
-
-export const SCHEMA_VERSION = "0.1.0";
-
-// Re-export all types
-export type {
-  // Geographic
-  GeoLocation,
-  // Enums
-  HouseSystem,
-  ZodiacType,
-  ZodiacSign,
-  CelestialBody,
-  AspectType,
-  EventType,
-  EventStream,
-  Significance,
-  AspectPhase,
-  StationType,
-  LunationType,
-  EclipseType,
-  ExportFormat,
-  // Chart input
-  ChartInputSource,
-  ChartBirthInput,
-  ChartLocationInput,
-  ChartInput,
-  AstroChartOptions,
-  // Data structures
-  PlanetPosition,
-  HouseData,
-  NatalChartAspect,
-  NatalChart,
-  // Events
-  AstrologyEvent,
-  TransitHit,
-  EventFilter,
-  ExportedEvent,
-  // Errors
-  AstroChartErrorCode,
-  AstroChartWarningCode,
-  AstroChartError,
-  AstroChartWarning,
-} from "./types.js";
-
-// Re-export all constants
 export {
-  ZODIAC_SIGNS,
-  SIGN_LONGITUDE_MAP,
-  SIGN_SYMBOLS,
-  SIGN_NAMES,
-  ALL_BODIES,
-  BODY_SYMBOLS,
-  BODY_NAMES,
-  OUTER_BODIES,
   ASPECT_ANGLES,
-  DEFAULT_ORBS,
-  ASPECT_SYMBOLS,
-  PTOLEMAIC_ASPECTS,
-  EVENT_STREAMS,
-  STREAM_NAMES,
-  SIGN_RULERS,
-  SIGN_ELEMENTS,
-  SIGN_MODALITIES,
-} from "./constants.js";
+  AspectSchema,
+  AspectTypeSchema,
+  CanonicalMetadataSchema,
+  CurrentSkySchema,
+  DEFAULT_TIGHT_ORBS,
+  EphemerisBodySchema,
+  EPHEMERIS_BODY_ORDER,
+  FRAME_VERSION,
+  MoonPhaseSchema,
+  PlanetPositionSchema,
+  ProjectionBodySchema,
+  PROJECTION_BODY_ORDER,
+  ProviderProvenanceSchema,
+  RawPlanetPositionSchema,
+  SCHEMA_VERSION,
+  WholeSignChartSchema,
+  ZODIAC_SIGN_ORDER,
+  ZodiacSignSchema,
+} from "./astronomy.js";
+export type {
+  Aspect,
+  AspectType,
+  CanonicalMetadata,
+  CurrentSky,
+  EphemerisBody,
+  MoonPhase,
+  PlanetPosition,
+  ProjectionBody,
+  ProviderProvenance,
+  RawPlanetPosition,
+  WholeSignChart,
+  ZodiacSign,
+} from "./astronomy.js";
+export {
+  AspectEventSchema,
+  EVENT_ALGORITHM_VERSION,
+  EVENT_SEARCH_LIMITS,
+  EventSearchRequestSchema,
+  EventSearchResultSchema,
+  IngressEventSchema,
+  LunationEventSchema,
+  MajorEventSchema,
+  MAX_EVENT_RESULTS,
+  MAX_EVENT_WINDOW_DAYS,
+  StationEventSchema,
+} from "./events.js";
+export type {
+  EventSearchRequest,
+  EventSearchResult,
+  MajorEvent,
+} from "./events.js";
+export {
+  HUMAN_DESIGN_MAPPING_VERSION,
+  HumanDesignTransitResultSchema,
+  HumanDesignTransitSchema,
+  MAX_SATURN_SEARCH_DAYS,
+  MIN_SATURN_ORB_DEGREES,
+  SATURN_RETURN_ALGORITHM_VERSION,
+  SaturnReturnPassSchema,
+  SaturnReturnRequestSchema,
+  SaturnReturnResultSchema,
+  SaturnReturnWindowSchema,
+  SESSION_PERSONAL_CLASSIFICATION,
+} from "./personal.js";
+export type {
+  HumanDesignTransit,
+  HumanDesignTransitResult,
+  SaturnReturnPass,
+  SaturnReturnRequest,
+  SaturnReturnResult,
+  SaturnReturnWindow,
+} from "./personal.js";
+export {
+  CivilTimeInputSchema,
+  DegreesPerDaySchema,
+  DegreesSchema,
+  EastLongitudeDegreesSchema,
+  EclipticLongitudeDegreesSchema,
+  GeoLocationSchema,
+  IanaTimezoneSchema,
+  LatitudeDegreesSchema,
+  SecondsSchema,
+  UtcInstantSchema,
+  UtcIntervalSchema,
+} from "./primitives.js";
+export type {
+  CivilTimeInput,
+  Degrees,
+  DegreesPerDay,
+  EastLongitudeDegrees,
+  EclipticLongitudeDegrees,
+  GeoLocation,
+  IanaTimezone,
+  LatitudeDegrees,
+  Seconds,
+  UtcInstant,
+  UtcInterval,
+} from "./primitives.js";
+export {
+  AnglesRequestSchema,
+  AstroErrorCodeSchema,
+  AstroErrorSchema,
+  LocalAnglesSchema,
+  PositionBatchSchema,
+  PositionRequestSchema,
+  ProviderCapabilitiesSchema,
+  validatePositionBatch,
+} from "./provider.js";
+export type {
+  AnglesRequest,
+  AbortSignalLike,
+  AstroError,
+  AstroErrorCode,
+  AstroResult,
+  EphemerisProvider,
+  LocalAngles,
+  PositionBatch,
+  PositionRequest,
+  ProviderCallOptions,
+  ProviderCapabilities,
+} from "./provider.js";

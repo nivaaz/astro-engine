@@ -1,0 +1,9 @@
+# Protected contracts and supply-chain configuration require owner review.
+/docs/contracts/ @nivaaz
+/docs/licensing/ @nivaaz
+/docs/security/ @nivaaz
+/packages/astro-schema/ @nivaaz
+/.github/workflows/ @nivaaz
+/.github/dependabot.yml @nivaaz
+/package.json @nivaaz
+/package-lock.json @nivaaz
