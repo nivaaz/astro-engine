@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#111111" />
+    <title>Offline — Astro Engine</title>
+    <style>
+      body {
+        margin: 0;
+        background: #111;
+        color: #f5f5f5;
+        font:
+          1rem/1.6 system-ui,
+          sans-serif;
+      }
+      main {
+        max-width: 36rem;
+        margin: 15vh auto;
+        padding: 1.5rem;
+      }
+      h1 {
+        font-size: 2rem;
+        letter-spacing: -0.04em;
+      }
+      p {
+        color: #bbb;
+      }
+      a {
+        display: inline-block;
+        padding: 0.75rem 0;
+        color: inherit;
+        text-underline-offset: 0.3em;
+      }
+      a:focus-visible {
+        outline: 2px solid currentColor;
+        outline-offset: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p>Astro Engine</p>
+      <section class="notice" role="status">
+        <h1>Offline</h1>
+        <p>
+          You are offline. No cached astronomical result is being presented as
+          current.
+        </p>
+      </section>
+      <a href="/">Try again when connected</a>
+    </main>
+  </body>
+</html>

@@ -37,6 +37,7 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["sweph"],
   outputFileTracingIncludes: {
     "/api/sky": ["./.private/ephemeris/**/*"],
+    "/api/format": ["./.private/ephemeris/**/*"],
   },
   turbopack: {
     root: repositoryRoot,

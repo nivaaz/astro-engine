@@ -31,7 +31,8 @@ body {
   background: var(--ink);
 }
 button,
-input {
+input,
+select {
   font: inherit;
 }
 button,
@@ -359,7 +360,8 @@ input {
   padding: 0.8rem 0.9rem;
   border-radius: 0;
 }
-input:hover {
+input:hover,
+select:hover {
   border-color: #5b584e;
 }
 .button {
@@ -396,6 +398,25 @@ input:hover {
 }
 .location-bar > .field-note {
   grid-column: 2;
+}
+.location-feedback {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+.whole-sign-result {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: var(--space-3) 0 0;
+}
+.whole-sign-result dt {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+.whole-sign-result dd {
+  margin: var(--space-1) 0 0;
+  font-size: clamp(1rem, 2vw, 1.5rem);
+  overflow-wrap: anywhere;
 }
 .field-note.valid {
   color: var(--green);

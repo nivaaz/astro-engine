@@ -1,6 +1,6 @@
-const SHELL_CACHE = "astro-engine-shell-v1";
+const SHELL_CACHE = "astro-engine-shell-v2";
 const CACHE_PREFIX = "astro-engine-shell-";
-const SHELL = ["/", "/manifest.webmanifest", "/icon"];
+const SHELL = ["/offline.html", "/manifest.webmanifest", "/icon"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -31,13 +31,14 @@ self.addEventListener("fetch", (event) => {
     url.search === "" &&
     (event.request.mode === "navigate" ||
       url.pathname.startsWith("/_next/static/") ||
+      url.pathname === "/offline.html" ||
       url.pathname === "/manifest.webmanifest" ||
       url.pathname === "/icon");
   if (event.request.method !== "GET" || !cacheable) return;
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        if (response.ok) {
+        if (response.ok && event.request.mode !== "navigate") {
           const copy = response.clone();
           event.waitUntil(
             caches
@@ -48,15 +49,11 @@ self.addEventListener("fetch", (event) => {
         return response;
       })
       .catch(() =>
-        caches
-          .match(event.request)
-          .then(
-            (cached) =>
-              cached ||
-              (event.request.mode === "navigate"
-                ? caches.match("/")
-                : Response.error()),
-          ),
+        event.request.mode === "navigate"
+          ? caches.match("/offline.html")
+          : caches
+              .match(event.request)
+              .then((cached) => cached || Response.error()),
       ),
   );
 });

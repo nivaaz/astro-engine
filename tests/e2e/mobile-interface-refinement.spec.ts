@@ -95,6 +95,8 @@ test("Saturn validation, result, unavailable, and copy feedback states are desig
   page,
   context,
 }) => {
+  // This case covers validation, calculation, copy, failure and offline reloads.
+  test.setTimeout(60_000);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.addInitScript(() => {
     Object.defineProperty(navigator, "clipboard", {

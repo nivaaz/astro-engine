@@ -6,8 +6,10 @@ import type {
   EventSearchResult,
   UtcInstant,
 } from "@sukara/astro-schema";
+import { MAX_EVENT_RESULTS } from "@sukara/astro-schema";
 import { CopyChartButton } from "../../components/copy-chart-button";
 import { SiteHeader } from "../../components/site-header";
+import { EventCoverage } from "../../components/event-coverage";
 import {
   eventLabel,
   formatEventDate,
@@ -66,7 +68,7 @@ async function loadPayload(): Promise<EventPayload> {
       operation: "events",
       request: {
         window: { start: currentSky.metadata.calculatedAt, end },
-        limit: 100,
+        limit: MAX_EVENT_RESULTS,
       },
     }),
   });
@@ -171,6 +173,9 @@ export default function EventsPage() {
             />
           </label>
         </div>
+        {payload && (
+          <EventCoverage result={payload.upcomingEvents} timezone={timezone} />
+        )}
         {payload && groups.length > 0 ? (
           <div className="timeline">
             {groups.map((group) => (
@@ -206,7 +211,13 @@ export default function EventsPage() {
             ))}
           </div>
         ) : payload ? (
-          <EmptyEvents />
+          <EmptyEvents
+            message={
+              payload.upcomingEvents.complete
+                ? "No relevant events in this bounded window."
+                : "No relevant events in the returned portion"
+            }
+          />
         ) : (
           <EmptyEvents
             message={

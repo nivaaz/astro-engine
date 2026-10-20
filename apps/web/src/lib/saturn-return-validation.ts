@@ -1,6 +1,7 @@
 export type SaturnFormErrors = Readonly<{
   date: string;
   city: string;
+  time: string;
 }>;
 
 export function validateSaturnReturnForm({
@@ -10,5 +11,6 @@ export function validateSaturnReturnForm({
   return {
     date: date === "" ? "Enter your birth date." : "",
     city: citySelected ? "" : "Choose a supported major city from the list.",
+    time: "",
   };
 }

@@ -15,7 +15,7 @@
     "@sukara/astro-schema": "0.1.0",
     "@sukara/human-design": "0.1.0",
     "@tailwindcss/postcss": "4.3.2",
-    "next": "16.2.12",
+    "next": "16.4.2",
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "tailwindcss": "4.3.2",

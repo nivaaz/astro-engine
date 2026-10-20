@@ -1,16 +1,18 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type {
   CurrentSky,
   EventSearchResult,
   HumanDesignTransitResult,
-  UtcInstant,
   WholeSignChart,
 } from "@sukara/astro-schema";
+import { MAX_EVENT_RESULTS } from "@sukara/astro-schema";
 import { formatArcminutes } from "@sukara/astro-formatters";
 import { CopyChartButton } from "../components/copy-chart-button";
 import { SiteHeader } from "../components/site-header";
+import { EventCoverage } from "../components/event-coverage";
+import { isSkyStale } from "../lib/sky-freshness";
 import {
   parseSkyTransportResponse,
   type SkyTransportResponse,
@@ -103,12 +105,16 @@ function formatClock(value: string, timezone: string): string {
   }
 }
 
-async function postOperation<T>(input: unknown): Promise<T> {
+async function postOperation<T>(
+  input: unknown,
+  signal?: AbortSignal,
+): Promise<T> {
   const response = await fetch("/api/sky", {
     method: "POST",
     cache: "no-store",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(input),
+    ...(signal ? { signal } : {}),
   });
   const body: unknown = await response.json();
   return providerEnvelopeValue<T>(body, response.ok);
@@ -138,15 +144,24 @@ export default function HomePage() {
     () => navigator.onLine,
     () => true,
   );
-  const [referenceInstant, setReferenceInstant] = useState<UtcInstant | null>(
-    null,
-  );
+  const [presentationNow, setPresentationNow] = useState(() => Date.now());
   const [location, setLocation] = useState(EMPTY_LOCATION);
   const [locationCity, setLocationCity] = useState("");
   const [wholeSign, setWholeSign] = useState<WholeSignChart | null>(null);
   const [calculationMessage, setCalculationMessage] = useState("");
+  const [localCalculating, setLocalCalculating] = useState(false);
+  const localRequest = useRef<AbortController | null>(null);
+
+  function resetLocalStructure() {
+    localRequest.current?.abort();
+    localRequest.current = null;
+    setLocalCalculating(false);
+    setWholeSign(null);
+    setCalculationMessage("");
+  }
 
   function chooseLocationCity(value: string) {
+    resetLocalStructure();
     setLocationCity(value);
     const city = findMajorCity(value);
     if (city === undefined) {
@@ -169,9 +184,13 @@ export default function HomePage() {
         const parsed = parseSkyTransportResponse(body);
         if (response.ok && parsed !== null) {
           setPayload(parsed);
-          setReferenceInstant(new Date().toISOString() as UtcInstant);
+          setPresentationNow(Date.now());
           setMode(parsed.mode);
-          setMessage("Fixture data loaded for interface verification.");
+          setMessage(
+            parsed.mode === "fixture"
+              ? "Fixture data loaded for interface verification."
+              : "Provider data loaded with canonical provenance.",
+          );
           return;
         }
         const currentSky = providerEnvelopeValue<CurrentSky>(body, response.ok);
@@ -182,7 +201,10 @@ export default function HomePage() {
         const [upcomingEvents, humanDesign] = await Promise.all([
           postOperation<EventSearchResult>({
             operation: "events",
-            request: { window: { start: instant, end }, limit: 100 },
+            request: {
+              window: { start: instant, end },
+              limit: MAX_EVENT_RESULTS,
+            },
           }),
           postOperation<HumanDesignTransitResult>({
             operation: "human-design",
@@ -195,7 +217,7 @@ export default function HomePage() {
           upcomingEvents,
           humanDesign,
         });
-        setReferenceInstant(new Date().toISOString() as UtcInstant);
+        setPresentationNow(Date.now());
         setMode("provider");
         setMessage("Provider data loaded with canonical provenance.");
       } catch {
@@ -207,11 +229,24 @@ export default function HomePage() {
     })();
   }, []);
 
+  useEffect(() => () => localRequest.current?.abort(), []);
+
+  useEffect(() => {
+    const update = () => setPresentationNow(Date.now());
+    const timer = window.setInterval(update, 30_000);
+    window.addEventListener("focus", update);
+    document.addEventListener("visibilitychange", update);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("focus", update);
+      document.removeEventListener("visibilitychange", update);
+    };
+  }, []);
+
   const stale =
-    payload && referenceInstant
-      ? Date.parse(referenceInstant) >=
-        Date.parse(payload.currentSky.metadata.validFor.end)
-      : false;
+    mode === "provider" &&
+    payload !== null &&
+    isSkyStale(payload.currentSky.metadata.calculatedAt, presentationNow);
   const locationValid =
     location.latitude !== "" &&
     location.longitude !== "" &&
@@ -229,9 +264,11 @@ export default function HomePage() {
             : "Unavailable";
 
   function useMyLocation() {
+    resetLocalStructure();
     setMessage("Requesting location permission…");
     navigator.geolocation.getCurrentPosition(
       ({ coords }) => {
+        resetLocalStructure();
         setLocationCity("");
         setLocation({
           latitude: coords.latitude.toFixed(5),
@@ -247,26 +284,42 @@ export default function HomePage() {
   }
 
   async function calculateLocalStructure() {
-    if (!locationValid) return;
+    if (!locationValid || localCalculating) return;
+    setLocalCalculating(true);
+    setWholeSign(null);
+    const request = new AbortController();
+    localRequest.current = request;
     setCalculationMessage("Calculating local structure…");
     try {
-      const value = await postOperation<WholeSignChart>({
-        operation: "whole-sign",
-        instant: new Date().toISOString(),
-        location: {
-          latitude: Number(location.latitude),
-          longitude: Number(location.longitude),
-          timezone: location.timezone,
+      const value = await postOperation<WholeSignChart>(
+        {
+          operation: "whole-sign",
+          instant: new Date().toISOString(),
+          location: {
+            latitude: Number(location.latitude),
+            longitude: Number(location.longitude),
+            timezone: location.timezone,
+          },
         },
-      });
+        request.signal,
+      );
+      if (localRequest.current !== request) return;
       setWholeSign(value);
       setCalculationMessage(
-        "Whole Sign structure calculated from fixture coordinates.",
+        mode === "fixture"
+          ? "Whole Sign fixture calculation complete."
+          : "Whole Sign calculation complete.",
       );
     } catch {
+      if (localRequest.current !== request || request.signal.aborted) return;
       setCalculationMessage(
         "Local structure is unavailable without a configured provider.",
       );
+    } finally {
+      if (localRequest.current === request) {
+        localRequest.current = null;
+        setLocalCalculating(false);
+      }
     }
   }
 
@@ -428,10 +481,12 @@ export default function HomePage() {
               type="button"
               onClick={calculateLocalStructure}
               disabled={
-                !locationValid || (mode !== "fixture" && mode !== "provider")
+                localCalculating ||
+                !locationValid ||
+                (mode !== "fixture" && mode !== "provider")
               }
             >
-              Calculate Whole Sign
+              {localCalculating ? "Calculating…" : "Calculate Whole Sign"}
             </button>
           </div>
           <details className="location-details wide">
@@ -444,6 +499,7 @@ export default function HomePage() {
                   value={location.latitude}
                   onChange={(e) => {
                     setLocationCity("");
+                    resetLocalStructure();
                     setLocation({ ...location, latitude: e.target.value });
                   }}
                   placeholder="−33.8688"
@@ -456,6 +512,7 @@ export default function HomePage() {
                   value={location.longitude}
                   onChange={(e) => {
                     setLocationCity("");
+                    resetLocalStructure();
                     setLocation({ ...location, longitude: e.target.value });
                   }}
                   placeholder="151.2093"
@@ -467,6 +524,7 @@ export default function HomePage() {
                   value={location.timezone}
                   onChange={(e) => {
                     setLocationCity("");
+                    resetLocalStructure();
                     setLocation({ ...location, timezone: e.target.value });
                   }}
                   placeholder="Australia/Sydney"
@@ -475,18 +533,34 @@ export default function HomePage() {
             </div>
           </details>
         </div>
-        <p className={`field-note ${locationValid ? "valid" : ""}`}>
-          {locationValid
-            ? `Local context ready${locationCity ? ` · ${locationCity}` : ""} · held in this tab only`
-            : "Choose a major city, enter coordinates, or use browser geolocation"}
-        </p>
-        {wholeSign && (
-          <p className="field-note valid" role="status">
-            Ascendant {formatArcminutes(wholeSign.ascendant)} · first house{" "}
-            {title(wholeSign.firstHouseSign)} · Midheaven{" "}
-            {formatArcminutes(wholeSign.midheaven)}
+        <div className="location-feedback">
+          <p className="field-note">
+            {locationValid
+              ? `Local context ready${locationCity ? ` · ${locationCity}` : ""} · held in this tab only`
+              : "Choose a major city, enter coordinates, or use browser geolocation"}
           </p>
-        )}
+          {calculationMessage && (
+            <p className="privacy-note" role="status">
+              {calculationMessage}
+            </p>
+          )}
+          {wholeSign && (
+            <dl className="whole-sign-result" aria-label="Whole Sign result">
+              <div>
+                <dt>Ascendant</dt>
+                <dd>{formatArcminutes(wholeSign.ascendant)}</dd>
+              </div>
+              <div>
+                <dt>First house</dt>
+                <dd>{title(wholeSign.firstHouseSign)}</dd>
+              </div>
+              <div>
+                <dt>Midheaven</dt>
+                <dd>{formatArcminutes(wholeSign.midheaven)}</dd>
+              </div>
+            </dl>
+          )}
+        </div>
         <datalist id="major-city-options">
           {MAJOR_CITIES.map((city) => (
             <option
@@ -511,6 +585,12 @@ export default function HomePage() {
             See all events
           </a>
         </div>
+        {payload && (
+          <EventCoverage
+            result={payload.upcomingEvents}
+            timezone={location.timezone || "UTC"}
+          />
+        )}
         {payload ? (
           <div className="timeline">
             {groupEventsByLocalDate(
@@ -544,7 +624,11 @@ export default function HomePage() {
             ).length === 0 && (
               <EmptyState
                 mode={mode}
-                message="No relevant events in this bounded window."
+                message={
+                  payload.upcomingEvents.complete
+                    ? "No relevant events in this bounded window."
+                    : "No relevant events in the returned portion."
+                }
               />
             )}
           </div>
@@ -565,11 +649,6 @@ export default function HomePage() {
           <a className="button" href="/saturn-return">
             Explore Saturn return
           </a>
-          {calculationMessage && (
-            <p className="privacy-note" aria-live="polite">
-              {calculationMessage}
-            </p>
-          )}
         </article>
         <article className="hd-card" id="human-design">
           <p className="section-index">05 / Tropical projection</p>

@@ -7,6 +7,7 @@ describe("Saturn-return form validation", () => {
       {
         date: "Enter your birth date.",
         city: "Choose a supported major city from the list.",
+        time: "",
       },
     );
   });
@@ -14,6 +15,6 @@ describe("Saturn-return form validation", () => {
   it("clears errors once date and supported city are present", () => {
     expect(
       validateSaturnReturnForm({ date: "1990-01-01", citySelected: true }),
-    ).toEqual({ date: "", city: "" });
+    ).toEqual({ date: "", city: "", time: "" });
   });
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   GeoLocationSchema,
   type SaturnReturnResult,
@@ -14,7 +14,10 @@ import {
   MAJOR_CITIES,
   type MajorCity,
 } from "../../lib/major-cities";
-import { localCivilToUtc } from "../../lib/local-time";
+import {
+  resolveLocalCivilTime,
+  type CivilTimeResolution,
+} from "../../lib/local-time";
 import {
   validateSaturnReturnForm,
   type SaturnFormErrors,
@@ -57,6 +60,17 @@ function providerValue<T>(body: unknown, ok: boolean): T {
   return body.value as T;
 }
 
+function offsetLabel(instant: UtcInstant, timezone: string): string {
+  return (
+    new Intl.DateTimeFormat("en-AU", {
+      timeZone: timezone,
+      timeZoneName: "longOffset",
+    })
+      .formatToParts(new Date(instant))
+      .find(({ type }) => type === "timeZoneName")?.value ?? "UTC"
+  );
+}
+
 export default function SaturnReturnPage() {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
@@ -69,18 +83,46 @@ export default function SaturnReturnPage() {
   const [formErrors, setFormErrors] = useState<SaturnFormErrors>({
     date: "",
     city: "",
+    time: "",
   });
+  const [ambiguousTime, setAmbiguousTime] = useState<Extract<
+    CivilTimeResolution,
+    { kind: "ambiguous" }
+  > | null>(null);
+  const [foldChoice, setFoldChoice] = useState<"earlier" | "later" | "">("");
   const dateRef = useRef<HTMLInputElement>(null);
   const cityRef = useRef<HTMLInputElement>(null);
+  const timeRef = useRef<HTMLInputElement>(null);
+  const foldRef = useRef<HTMLSelectElement>(null);
+  const calculationRequest = useRef<AbortController | null>(null);
   const noonApproximation = time === "";
 
+  useEffect(() => () => calculationRequest.current?.abort(), []);
+
+  function invalidateCalculation() {
+    calculationRequest.current?.abort();
+    calculationRequest.current = null;
+    setResult(null);
+    setStatus("idle");
+    setMessage("");
+  }
+
+  function resetCivilChoice() {
+    invalidateCalculation();
+    setAmbiguousTime(null);
+    setFoldChoice("");
+    setFormErrors((current) => ({ ...current, time: "" }));
+  }
+
   function selectCity(value: string) {
+    resetCivilChoice();
     setCityText(value);
     setCity(findMajorCity(value) ?? null);
     setFormErrors((current) => ({ ...current, city: "" }));
   }
 
   async function calculate() {
+    setResult(null);
     const selectedCity = city ?? findMajorCity(cityText);
     const nextErrors = validateSaturnReturnForm({
       date,
@@ -97,21 +139,42 @@ export default function SaturnReturnPage() {
       return;
     }
     if (selectedCity === undefined || selectedCity === null) return;
-    const birthInstant = localCivilToUtc(
+    const resolution = resolveLocalCivilTime(
       date,
       time || "12:00",
       selectedCity.timezone,
     );
-    if (birthInstant === null) {
+    if (resolution.kind === "nonexistent" || resolution.kind === "invalid") {
       setStatus("error");
+      setMessage("");
       setFormErrors({
-        date: "The local birth date and time could not be resolved.",
+        date: "",
         city: "",
+        time:
+          resolution.kind === "nonexistent"
+            ? "This local date and time do not exist because the clocks moved forward. Enter another time or date."
+            : "Enter a valid local birth date and time.",
       });
-      dateRef.current?.focus();
+      timeRef.current?.focus();
       return;
     }
-    setFormErrors({ date: "", city: "" });
+    if (resolution.kind === "ambiguous" && foldChoice === "") {
+      setAmbiguousTime(resolution);
+      setStatus("error");
+      setMessage("");
+      setFormErrors({
+        date: "",
+        city: "",
+        time: "This local time occurs twice. Choose its first or second occurrence.",
+      });
+      window.requestAnimationFrame(() => foldRef.current?.focus());
+      return;
+    }
+    const birthInstant =
+      resolution.kind === "resolved"
+        ? resolution.instant
+        : resolution[foldChoice as "earlier" | "later"];
+    setFormErrors({ date: "", city: "", time: "" });
     const asOf = new Date();
     const start = new Date(asOf);
     start.setUTCFullYear(start.getUTCFullYear() - 2);
@@ -121,11 +184,15 @@ export default function SaturnReturnPage() {
     setUsedNoon(noonApproximation);
     setMessage("Searching the bounded Saturn-return range…");
     setResult(null);
+    const request = new AbortController();
+    calculationRequest.current?.abort();
+    calculationRequest.current = request;
     try {
       const response = await fetch("/api/sky", {
         method: "POST",
         cache: "no-store",
         headers: { "content-type": "application/json" },
+        signal: request.signal,
         body: JSON.stringify({
           operation: "saturn-return",
           birthInstant,
@@ -135,6 +202,7 @@ export default function SaturnReturnPage() {
         }),
       });
       const body: unknown = await response.json();
+      if (calculationRequest.current !== request) return;
       const value = providerValue<SaturnReturnResult>(body, response.ok);
       setCity(selectedCity);
       setResult(value);
@@ -143,6 +211,8 @@ export default function SaturnReturnPage() {
         "Saturn-return calculation complete. Exact passes are shown below.",
       );
     } catch {
+      if (calculationRequest.current !== request || request.signal.aborted)
+        return;
       setStatus("unavailable");
       setMessage(
         "Saturn return is unavailable without a configured licensed provider.",
@@ -192,6 +262,7 @@ export default function SaturnReturnPage() {
               type="date"
               value={date}
               onChange={(event) => {
+                resetCivilChoice();
                 setDate(event.target.value);
                 setFormErrors((current) => ({ ...current, date: "" }));
               }}
@@ -208,12 +279,51 @@ export default function SaturnReturnPage() {
           <label>
             Local time <span className="optional">optional</span>
             <input
+              ref={timeRef}
               type="time"
               value={time}
-              onChange={(event) => setTime(event.target.value)}
-              aria-describedby="time-precision"
+              onChange={(event) => {
+                resetCivilChoice();
+                setTime(event.target.value);
+              }}
+              aria-invalid={formErrors.time !== ""}
+              aria-describedby={
+                formErrors.time ? "time-error time-precision" : "time-precision"
+              }
             />
+            {formErrors.time && (
+              <span id="time-error" className="form-error" role="alert">
+                {formErrors.time}
+              </span>
+            )}
           </label>
+          {ambiguousTime && city && (
+            <label className="wide">
+              Repeated local time
+              <select
+                ref={foldRef}
+                value={foldChoice}
+                onChange={(event) => {
+                  invalidateCalculation();
+                  const value = event.target.value;
+                  setFoldChoice(
+                    value === "earlier" || value === "later" ? value : "",
+                  );
+                  setFormErrors((current) => ({ ...current, time: "" }));
+                }}
+              >
+                <option value="">Choose first or second occurrence</option>
+                <option value="earlier">
+                  First occurrence (
+                  {offsetLabel(ambiguousTime.earlier, city.timezone)})
+                </option>
+                <option value="later">
+                  Second occurrence (
+                  {offsetLabel(ambiguousTime.later, city.timezone)})
+                </option>
+              </select>
+            </label>
+          )}
           <label className="wide">
             Supported major city
             <input

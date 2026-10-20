@@ -169,6 +169,9 @@ test("offline reload presents no cached astronomical result", async ({
     ),
   ).toBeVisible();
   await expect(page.getByText("Sun", { exact: true })).toHaveCount(0);
+  await context.setOffline(false);
+  await page.reload();
+  await expect(page.locator(".notice")).toContainText(/fixture|current/i);
 });
 
 test("major city lookup fills canonical local context without a network request", async ({
