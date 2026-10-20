@@ -50,6 +50,7 @@ test("events route shows full grouped result, filters Moon/quarter events, and s
   await expect(
     page.getByRole("heading", { name: "Upcoming events" }),
   ).toBeVisible();
+  await page.getByLabel("Timezone", { exact: true }).fill("Australia/Sydney");
   await expect(page.locator(".event-date-group")).toHaveCount(5);
   await expect(page.getByText("First quarter Moon")).toHaveCount(0);
   await expect(page.getByText(/Moon square/i)).toHaveCount(0);
