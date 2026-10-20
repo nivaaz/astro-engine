@@ -1,0 +1,16 @@
+.git/
+node_modules/
+**/node_modules/
+**/.next/
+**/.turbo/
+**/dist/
+.private/
+**/.private/
+.env*
+**/.env*
+*.se1
+*.se2
+*.wasm
+coverage/
+playwright-report/
+test-results/
