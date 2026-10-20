@@ -1,12 +1,12 @@
 # Production audit fixes and integrated release
 
-- Status: In review
+- Status: Shipped
 - Task class: T3 release, with T2 civil-time and privacy controls
 - Risk tier: High for local-time conversion; Critical for production promotion
 - Authority: Owner requested the four hosted fixes, daylight-saving correction, integration of the latest work, and production deployment on 20 October 2026. Signed commercial Swiss terms are recorded as confirmed in `docs/licensing/LICENSING.md`.
 - Base: `dce2ad9` includes the foundation, Public V1 refinements, and mobile interface work. Preserve unrelated changes in the original checkout.
 - Current decision: retain canonical astronomical/provider contracts; fix presentation and civil-time resolution in the consumer; reject nonexistent times and require an explicit choice for repeated times.
-- Next action: finish release gates, stage the production build, verify the real provider/copy and offline flows, then promote and record the public-domain evidence.
+- Next action: None for this release. Verified production identity and evidence are recorded in `docs/releases/2026-10-20-public-v1.md`.
 
 ## Acceptance
 
